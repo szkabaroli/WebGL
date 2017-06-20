@@ -1,0 +1,1 @@
+console.error("TypeScript error: src/render/loader.ts(16,42): Error TS2345: Argument of type 'number[]' is not assignable to parameter of type 'ArrayBuffer'.\r\n  Property 'byteLength' is missing in type 'number[]'.");

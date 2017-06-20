@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "noImplicitAny": true,
+        "module": "commonjs",
+        "target": "es5"
+    },
+    "files": [
+        "./src/app.ts",
+        "./src/render/renderer.ts",
+        "./src/render/context.ts"
+        
+    ]
+}
