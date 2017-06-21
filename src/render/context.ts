@@ -1,8 +1,10 @@
+import * as basicShader from '../shaders/basicShader';
+
 interface IRenderUpdateCallback {
     () : void;
 }
 
-export default class DisplayManager {
+class DisplayManager {
     
     private canvas: HTMLCanvasElement;
     private gl: any;
@@ -12,6 +14,7 @@ export default class DisplayManager {
         this.canvas = <HTMLCanvasElement> document.getElementById(canvasId);
         this.gl = this.canvas.getContext('webgl2');
         return this.gl;
+
 
     }
 
@@ -28,3 +31,5 @@ export default class DisplayManager {
 
     
 }
+
+export default DisplayManager;

@@ -2,6 +2,7 @@ import DisplayManager from './render/context';
 import Renderer from './render/renderer'
 import RawModel from './render/model'
 import Loader from './render/loader'
+import BasicShader from './render/basicshader';
 
 class main {
     
@@ -14,29 +15,34 @@ class main {
         this.gl = mDisplayManager.createDisplay('gl');
 
         //create loader and renderer
-        var mLoader : Loader = new Loader(this.gl)
         var mRenderer : Renderer = new Renderer(this.gl)
+        var mLoader : Loader = new Loader(this.gl)
+        var mBasicShader : BasicShader = new BasicShader(this.gl);
 
         //rectangle verticies
         var verticies : number[] = [
-            -0.5, 0.5, 0,
-            -0.5, -0.5, 0,
-            0.5, -0.5, 0,
-            
-            0.5, -0.5, 0,
-            0.5, 0.5, 0,
-            -0.5, 0.5, 0,
+            -0.5, 0.5, 0.0,
+            -0.5, -0.5, 0.0,
+            0.5, -0.5, 0.0,
+            0.5, 0.5, 0.0,
+        ];
+
+        var indicies : number[] = [
+            0, 1, 3, 
+            3, 1, 2
         ]
 
-        var Rect : RawModel = mLoader.loadToVAO(verticies);
+        var Rect : RawModel = mLoader.loadToVAO(verticies, indicies);
 
         //Main loop
-        while(true) {
-            mDisplayManager.updateDisplay(() : void => {
-                mRenderer.init();
-                mRenderer.render(Rect);
-            })
-        }
+        
+        mDisplayManager.updateDisplay(() : void => {
+            mRenderer.preRender();
+            mBasicShader.start();
+            mRenderer.render(Rect);
+            mBasicShader.stop();
+        })
+        
         //mLoader.cleanUp();
     }
 }
