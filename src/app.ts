@@ -1,6 +1,6 @@
 import DisplayManager from './render/context';
 import Renderer from './render/renderer'
-import RawModel from './render/model'
+import Model from './render/model'
 import Loader from './render/loader'
 import BasicShader from './render/basicshader';
 
@@ -26,13 +26,13 @@ class main {
             0.5, -0.5, 0.0,
             0.5, 0.5, 0.0,
         ];
-
+        
         var indicies : number[] = [
             0, 1, 3, 
             3, 1, 2
         ]
-
-        var Rect : RawModel = mLoader.loadToVAO(verticies, indicies);
+        
+        var Rect : Model = mLoader.loadToVAO(verticies, indicies);
 
         //Main loop
         

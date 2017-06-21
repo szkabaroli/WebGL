@@ -1,4 +1,4 @@
-export default class RawModel {
+export default class Model {
     
     private vaoId : number;
     private vertexCount : number;

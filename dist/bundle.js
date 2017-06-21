@@ -104,6 +104,19 @@ var Loader = (function () {
         this.unbindVAO();
         return new model_1.default(vaoID, indicies.length);
     };
+    Loader.prototype.loadTexture = function (fileName) {
+        var _this = this;
+        var textureId = this.gl.createTexture();
+        var image = new Image();
+        image.src = fileName;
+        image.onload = function () {
+            _this.gl.bindTexture(_this.gl.TEXTURE_2D, textureId);
+            _this.gl.texImage2D(_this.gl.TEXTURE_2D, _this.gl.RGBA);
+            _this.gl.texParameteri(_this.gl.TEXTURE_2D, _this.gl.TEXTURE_MAG_FILTER, _this.gl.LINEAR);
+            _this.gl.bindTexture(_this.gl.TEXTURE_2D, null);
+            return textureId;
+        };
+    };
     Loader.prototype.createVAO = function () {
         var vaoId = this.gl.createVertexArray();
         this.gl.bindVertexArray(vaoId);
@@ -131,20 +144,20 @@ exports.default = Loader;
 },{"./model":5}],5:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var RawModel = (function () {
-    function RawModel(vaoId, vertexCount) {
+var Model = (function () {
+    function Model(vaoId, vertexCount) {
         this.vaoId = vaoId;
         this.vertexCount = vertexCount;
     }
-    RawModel.prototype.getVaoId = function () {
+    Model.prototype.getVaoId = function () {
         return this.vaoId;
     };
-    RawModel.prototype.getVertexCount = function () {
+    Model.prototype.getVertexCount = function () {
         return this.vertexCount;
     };
-    return RawModel;
+    return Model;
 }());
-exports.default = RawModel;
+exports.default = Model;
 
 },{}],6:[function(require,module,exports){
 "use strict";

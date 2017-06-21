@@ -1,4 +1,4 @@
-import RawModel from './model'
+import Model from './model'
 
 export default class Loader {
     
@@ -8,12 +8,25 @@ export default class Loader {
         this.gl = gl;
     }
 
-    public loadToVAO(verticies : number[], indicies : number[]) : RawModel {
+    public loadToVAO(verticies : number[], indicies : number[]) : Model {
         var vaoID : number = this.createVAO();
         this.storeDataInAttributeList(0, verticies);
         this.bindIndiciesBuffer(indicies);
         this.unbindVAO();
-        return new RawModel(vaoID, indicies.length);
+        return new Model(vaoID, indicies.length);
+    }
+
+    public loadTexture(fileName : string) : any {
+        var textureId = this.gl.createTexture();
+        var image = new Image();
+        image.src = fileName;
+        image.onload = () => {
+            this.gl.bindTexture(this.gl.TEXTURE_2D, textureId);
+            this.gl.texImage2D(this.gl.TEXTURE_2D, this.gl.RGBA, )
+            this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR)
+            this.gl.bindTexture(this.gl.TEXTURE_2D, null);
+            return textureId;
+        }
     }
 
     private createVAO() : any {
@@ -21,6 +34,7 @@ export default class Loader {
         this.gl.bindVertexArray(vaoId);
         return vaoId;
     }
+    
 
     private storeDataInAttributeList(attributeNumber : number, data : number[]) : void {
         var vboId : number = this.gl.createBuffer();
