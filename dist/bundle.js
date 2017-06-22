@@ -79,9 +79,13 @@ var BasicShader = (function (_super) {
     };
     BasicShader.prototype.getUniformLocations = function () {
         this.transformMatrixLoc = _super.prototype.getUniformLocation.call(this, 'transformationMatrix');
+        this.projectionMatrixLoc = _super.prototype.getUniformLocation.call(this, 'projectionMatrix');
     };
     BasicShader.prototype.loadTransformMatrix = function (matrix) {
         _super.prototype.loadMatrix.call(this, this.transformMatrixLoc, matrix);
+    };
+    BasicShader.prototype.loadProjectionMatrix = function (matrix) {
+        _super.prototype.loadMatrix.call(this, this.projectionMatrixLoc, matrix);
     };
     return BasicShader;
 }(shaderprogram_1.default));
@@ -96,6 +100,8 @@ var DisplayManager = (function () {
     DisplayManager.prototype.createDisplay = function (canvasId) {
         this.canvas = document.getElementById(canvasId);
         this.gl = this.canvas.getContext('webgl2');
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
         return this.gl;
     };
     DisplayManager.prototype.updateDisplay = function (callback) {
@@ -360,6 +366,14 @@ var Utils = (function () {
         matrix.scale(new Vec3(s, s, s));
         return matrix;
     };
+    Utils.createProjectionMatrix = function (FOV, NEAR_PLANE, FAR_PLANE) {
+        var aspectRatio = window.innerWidth / window.innerHeight;
+        var yScale = (1 / Math.tan(this.toRad(FOV / 2))) * aspectRatio;
+        var xScale = yScale / aspectRatio;
+        var frustumLength = FAR_PLANE - NEAR_PLANE;
+        var matrix = new Mat4();
+        return;
+    };
     return Utils;
 }());
 exports.Utils = Utils;
@@ -410,6 +424,9 @@ var Renderer = (function () {
     };
     return Renderer;
 }());
+Renderer.FOV = 70;
+Renderer.NEAR_PLANE = 0.1;
+Renderer.FAR_PLANE = 1000;
 exports.default = Renderer;
 
 },{"./math":6}],9:[function(require,module,exports){
@@ -507,7 +524,7 @@ exports.default = TexturedModel;
 },{}],12:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.vertexShader = "#version 300 es\n\nprecision mediump float;\n\nin vec3 position;\n\nin vec2 textureCoords;\n\nuniform mat4 transformationMatrix;\n\nout vec2 passedTextureCoords;\n\nvoid main(){\n    gl_Position = transformationMatrix * vec4(position, 1.0f);\n    passedTextureCoords = textureCoords;\n} \n";
+exports.vertexShader = "#version 300 es\n\nprecision mediump float;\n\nin vec3 position;\n\nin vec2 textureCoords;\n\nuniform mat4 transformationMatrix;\nuniform mat4 projectionMatrix;\n\nout vec2 passedTextureCoords;\n\nvoid main(){\n    gl_Position = transformationMatrix * vec4(position, 1.0f);\n    passedTextureCoords = textureCoords;\n} \n";
 exports.fragmentShader = "#version 300 es\n\nprecision mediump float;\n\nin vec2 passedTextureCoords;\n\nuniform sampler2D textureSampler;\n\nout vec4 out_Color;\n\nvoid main() {\n    out_Color = texture(textureSampler, passedTextureCoords);\n}";
 
 },{}]},{},[1]);

@@ -8,6 +8,7 @@ in vec3 position;
 in vec2 textureCoords;
 
 uniform mat4 transformationMatrix;
+uniform mat4 projectionMatrix;
 
 out vec2 passedTextureCoords;
 

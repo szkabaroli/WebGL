@@ -7,6 +7,12 @@ export default class Renderer {
     
     private gl : any
 
+    private static FOV : number = 70;
+    private static NEAR_PLANE : number = 0.1;
+    private static FAR_PLANE : number = 1000;
+
+    private projectionMatrix : Mat4;
+
     constructor(gl : any) {
         this.gl = gl;
     }

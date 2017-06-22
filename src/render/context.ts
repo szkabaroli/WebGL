@@ -13,6 +13,8 @@ class DisplayManager {
         
         this.canvas = <HTMLCanvasElement> document.getElementById(canvasId);
         this.gl = this.canvas.getContext('webgl2');
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
         return this.gl;
 
 

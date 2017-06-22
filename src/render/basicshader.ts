@@ -5,6 +5,7 @@ import { Mat4 } from './math';
 class BasicShader extends ShaderProgram{
 
     private transformMatrixLoc : number;
+    private projectionMatrixLoc : number;
 
     constructor(gl : any) {
         super(gl, vertexShader, fragmentShader);
@@ -16,11 +17,15 @@ class BasicShader extends ShaderProgram{
     }
     protected getUniformLocations() {
         this.transformMatrixLoc = super.getUniformLocation('transformationMatrix');
-
+        this.projectionMatrixLoc = super.getUniformLocation('projectionMatrix');
     }
 
     public loadTransformMatrix(matrix : Mat4) {
         super.loadMatrix(this.transformMatrixLoc, matrix);
+    }
+
+    public loadProjectionMatrix(matrix : Mat4) {
+        super.loadMatrix(this.projectionMatrixLoc, matrix);
     }
 }
 

@@ -208,4 +208,14 @@ export class Utils {
         matrix.scale(new Vec3(s,s,s));
         return matrix;
     }
+
+    public static createProjectionMatrix(FOV : number, NEAR_PLANE : number, FAR_PLANE : number) : Mat4 {
+        const aspectRatio = window.innerWidth / window.innerHeight;
+        const yScale = (1 / Math.tan(this.toRad(FOV / 2))) * aspectRatio;
+        const xScale = yScale / aspectRatio;
+        const frustumLength = FAR_PLANE - NEAR_PLANE;
+
+        let matrix = new Mat4();
+        return
+    }
 }
