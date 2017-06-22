@@ -12,9 +12,9 @@ class DisplayManager {
     public createDisplay(canvasId : string) : WebGLRenderingContext {
         
         this.canvas = <HTMLCanvasElement> document.getElementById(canvasId);
-        this.gl = this.canvas.getContext('webgl2');
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
+        this.gl = this.canvas.getContext('webgl2');
         return this.gl;
 
 

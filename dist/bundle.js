@@ -35,9 +35,9 @@ var main = (function () {
             1, 0
         ];
         var Model = mLoader.loadToVAO(verticies, textCoords, indicies);
-        var Texture = mLoader.loadTexture('res/grid.png');
+        var Texture = mLoader.loadTexture('res/ts.png');
         var Rect = new texturedModel_1.default(Model, Texture);
-        var mEntity = new entity_1.default(Rect, new math_1.Vec3(-1, 0, 0), new math_1.Vec3(0, 0, 0), 0.5);
+        var mEntity = new entity_1.default(Rect, new math_1.Vec3(-1, 0, 0), new math_1.Vec3(0, 0, 0), 0.2);
         //Main loop
         mDisplayManager.updateDisplay(function () {
             mEntity.increasePosition(new math_1.Vec3(0.002, 0, 0));
@@ -99,9 +99,9 @@ var DisplayManager = (function () {
     }
     DisplayManager.prototype.createDisplay = function (canvasId) {
         this.canvas = document.getElementById(canvasId);
-        this.gl = this.canvas.getContext('webgl2');
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
+        this.gl = this.canvas.getContext('webgl2');
         return this.gl;
     };
     DisplayManager.prototype.updateDisplay = function (callback) {

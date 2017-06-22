@@ -45,10 +45,10 @@ class main {
         
         
         var Model : Model = mLoader.loadToVAO(verticies, textCoords, indicies);
-        var Texture : Texture = mLoader.loadTexture('res/grid.png');
+        var Texture : Texture = mLoader.loadTexture('res/ts.png');
         var Rect : TexturedModel = new TexturedModel(Model, Texture);
 
-        var mEntity : Entity = new Entity(Rect, new Vec3(-1,0,0), new Vec3(0,0,0), 0.5);
+        var mEntity : Entity = new Entity(Rect, new Vec3(-1,0,0), new Vec3(0,0,0), 0.2);
 
         //Main loop
         
