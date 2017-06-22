@@ -6,7 +6,8 @@ class BasicShader extends ShaderProgram{
         super(gl, vertexShader, fragmentShader);
     }
     protected bindAttributes() : void{
-        super.bindAttribute(0, 'positions')
+        super.bindAttribute(0, 'positions');
+        super.bindAttribute(1, 'textureCoords');
     }
 }
 

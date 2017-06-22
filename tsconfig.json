@@ -8,7 +8,8 @@
         "./src/app.ts",
         "./src/render/renderer.ts",
         "./src/render/context.ts",
-        "./src/render/gl-matrix.d.ts"
+        "./src/render/gl-matrix.d.ts",
+        "./src/render/gl-matrix.js"
         
     ]
 }

@@ -5,16 +5,16 @@ class TexturedModel {
     private model : Model;
     private texture : Texture;
 
-    constructor(rawModel : Model, texture : Texture) {
-        this.model = rawModel;
+    constructor(model : Model, texture : Texture) {
+        this.model = model;
         this.texture = texture;
     }
 
-    public get getModel() : Model {
+    public getModel() : Model {
         return this.model;
     }
  
-    public get getTexture() : Texture {
+    public getTexture() : Texture {
         return this.texture;
     }
 }

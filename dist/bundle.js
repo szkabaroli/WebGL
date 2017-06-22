@@ -5,6 +5,7 @@ var context_1 = require("./render/context");
 var renderer_1 = require("./render/renderer");
 var loader_1 = require("./render/loader");
 var basicshader_1 = require("./render/basicshader");
+var texturedModel_1 = require("./render/texturedModel");
 var main = (function () {
     function main() {
         //create display
@@ -25,7 +26,16 @@ var main = (function () {
             0, 1, 3,
             3, 1, 2
         ];
-        var Rect = mLoader.loadToVAO(verticies, indicies);
+        var textCoords = [
+            0, 0,
+            0, 1,
+            1, 1,
+            1, 0
+        ];
+        console.log(glMatrix.toRadian(10));
+        var Model = mLoader.loadToVAO(verticies, textCoords, indicies);
+        var Texture = mLoader.loadTexture('res/grid.png');
+        var Rect = new texturedModel_1.default(Model, Texture);
         //Main loop
         mDisplayManager.updateDisplay(function () {
             mRenderer.preRender();
@@ -39,7 +49,7 @@ var main = (function () {
 }());
 new main;
 
-},{"./render/basicshader":2,"./render/context":3,"./render/loader":4,"./render/renderer":6}],2:[function(require,module,exports){
+},{"./render/basicshader":2,"./render/context":3,"./render/loader":4,"./render/renderer":6,"./render/texturedModel":9}],2:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -61,12 +71,13 @@ var BasicShader = (function (_super) {
     }
     BasicShader.prototype.bindAttributes = function () {
         _super.prototype.bindAttribute.call(this, 0, 'positions');
+        _super.prototype.bindAttribute.call(this, 1, 'textureCoords');
     };
     return BasicShader;
 }(shaderprogram_1.default));
 exports.default = BasicShader;
 
-},{"../shaders/basicShader":8,"./shaderprogram":7}],3:[function(require,module,exports){
+},{"../shaders/basicShader":10,"./shaderprogram":7}],3:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var DisplayManager = (function () {
@@ -93,13 +104,15 @@ exports.default = DisplayManager;
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var model_1 = require("./model");
+var texture_1 = require("./texture");
 var Loader = (function () {
     function Loader(gl) {
         this.gl = gl;
     }
-    Loader.prototype.loadToVAO = function (verticies, indicies) {
+    Loader.prototype.loadToVAO = function (verticies, textCoords, indicies) {
         var vaoID = this.createVAO();
-        this.storeDataInAttributeList(0, verticies);
+        this.storeDataInAttributeList(0, 3, verticies);
+        this.storeDataInAttributeList(1, 2, textCoords);
         this.bindIndiciesBuffer(indicies);
         this.unbindVAO();
         return new model_1.default(vaoID, indicies.length);
@@ -111,22 +124,23 @@ var Loader = (function () {
         image.src = fileName;
         image.onload = function () {
             _this.gl.bindTexture(_this.gl.TEXTURE_2D, textureId);
-            _this.gl.texImage2D(_this.gl.TEXTURE_2D, _this.gl.RGBA);
+            _this.gl.texImage2D(_this.gl.TEXTURE_2D, 0, _this.gl.RGBA, _this.gl.RGBA, _this.gl.UNSIGNED_BYTE, image);
             _this.gl.texParameteri(_this.gl.TEXTURE_2D, _this.gl.TEXTURE_MAG_FILTER, _this.gl.LINEAR);
+            _this.gl.texParameteri(_this.gl.TEXTURE_2D, _this.gl.TEXTURE_MIN_FILTER, _this.gl.LINEAR);
             _this.gl.bindTexture(_this.gl.TEXTURE_2D, null);
-            return textureId;
         };
+        return new texture_1.default(textureId);
     };
     Loader.prototype.createVAO = function () {
         var vaoId = this.gl.createVertexArray();
         this.gl.bindVertexArray(vaoId);
         return vaoId;
     };
-    Loader.prototype.storeDataInAttributeList = function (attributeNumber, data) {
+    Loader.prototype.storeDataInAttributeList = function (attributeNumber, size, data) {
         var vboId = this.gl.createBuffer();
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, vboId);
         this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(data), this.gl.STATIC_DRAW);
-        this.gl.vertexAttribPointer(attributeNumber, 3, this.gl.FLOAT, false, 0, 0);
+        this.gl.vertexAttribPointer(attributeNumber, size, this.gl.FLOAT, false, 0, 0);
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null);
     };
     Loader.prototype.unbindVAO = function () {
@@ -141,7 +155,7 @@ var Loader = (function () {
 }());
 exports.default = Loader;
 
-},{"./model":5}],5:[function(require,module,exports){
+},{"./model":5,"./texture":8}],5:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Model = (function () {
@@ -171,10 +185,15 @@ var Renderer = (function () {
         this.gl.clearColor(0, 0, 0, 100);
     };
     Renderer.prototype.render = function (model) {
-        this.gl.bindVertexArray(model.getVaoId());
+        this.gl.bindVertexArray(model.getModel().getVaoId());
         this.gl.enableVertexAttribArray(0);
-        this.gl.drawElements(this.gl.TRIANGLES, model.getVertexCount(), this.gl.UNSIGNED_INT, 0);
+        this.gl.enableVertexAttribArray(1);
+        this.gl.activeTexture(this.gl.TEXTURE0);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, model.getTexture().getTextureId());
+        this.gl.drawElements(this.gl.TRIANGLES, model.getModel().getVertexCount(), this.gl.UNSIGNED_INT, 0);
         this.gl.disableVertexAttribArray(0);
+        this.gl.disableVertexAttribArray(1);
+        this.gl.bindVertexArray(null);
     };
     return Renderer;
 }());
@@ -222,7 +241,39 @@ exports.default = ShaderProgram;
 },{}],8:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.vertexShader = "#version 300 es\nprecision mediump float;\nin vec3 position;\n\nout vec3 color;\n\nvoid main(){\n    gl_Position = vec4(position, 1.0f);\n    color = vec3(position.x+0.5f, 1.0f, position.y+0.5f);\n} \n";
-exports.fragmentShader = "#version 300 es\nprecision mediump float;\nin vec3 color;\n\nout vec4 out_Color;\n\nvoid main() {\n    out_Color = vec4(color, 1.0f);\n}";
+var Texture = (function () {
+    function Texture(textureId) {
+        this.textureId = textureId;
+    }
+    Texture.prototype.getTextureId = function () {
+        return this.textureId;
+    };
+    return Texture;
+}());
+exports.default = Texture;
+
+},{}],9:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var TexturedModel = (function () {
+    function TexturedModel(model, texture) {
+        this.model = model;
+        this.texture = texture;
+    }
+    TexturedModel.prototype.getModel = function () {
+        return this.model;
+    };
+    TexturedModel.prototype.getTexture = function () {
+        return this.texture;
+    };
+    return TexturedModel;
+}());
+exports.default = TexturedModel;
+
+},{}],10:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.vertexShader = "#version 300 es\n\nprecision mediump float;\n\nin vec3 position;\n\nin vec2 textureCoords;\n\nout vec2 passedTextureCoords;\n\nvoid main(){\n    gl_Position = vec4(position, 1.0f);\n    passedTextureCoords = textureCoords;\n} \n";
+exports.fragmentShader = "#version 300 es\n\nprecision mediump float;\n\nin vec2 passedTextureCoords;\n\nuniform sampler2D textureSampler;\n\nout vec4 out_Color;\n\nvoid main() {\n    out_Color = texture(textureSampler, passedTextureCoords);\n}";
 
 },{}]},{},[1]);
