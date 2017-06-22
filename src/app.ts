@@ -5,6 +5,8 @@ import Loader from './render/loader'
 import BasicShader from './render/basicshader';
 import TexturedModel from './render/texturedModel';
 import Texture from './render/texture';
+import Entity from './render/entity';
+import { Vec3 } from './render/math';
 
 class main {
     
@@ -40,20 +42,22 @@ class main {
             1,1,
             1,0
         ]
-
-        console.log(glMatrix.toRadian(10));
         
         
         var Model : Model = mLoader.loadToVAO(verticies, textCoords, indicies);
         var Texture : Texture = mLoader.loadTexture('res/grid.png');
         var Rect : TexturedModel = new TexturedModel(Model, Texture);
 
+        var mEntity : Entity = new Entity(Rect, new Vec3(-1,0,0), new Vec3(0,0,0), 0.5);
+
         //Main loop
         
         mDisplayManager.updateDisplay(() : void => {
+            mEntity.increasePosition(new Vec3(0.002, 0,0));
+            mEntity.increaseRotation(new Vec3(1, 1,0));
             mRenderer.preRender();
             mBasicShader.start();
-            mRenderer.render(Rect);
+            mRenderer.render(mEntity, mBasicShader);
             mBasicShader.stop();
         })
         
