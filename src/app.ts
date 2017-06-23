@@ -8,6 +8,7 @@ import Texture from './render/texture';
 import Entity from './render/entity';
 import { Vec3 } from './render/math';
 import Camera from './render/camera';
+import OBJLoader from './render/OBJLoader';
 
 class main {
     
@@ -104,10 +105,13 @@ class main {
             1,1,
             1,0
         ]
+
+        console.log(OBJLoader.loadOBJModel('res/test.txt', mLoader));
+        
         
         
         var Model : Model = mLoader.loadToVAO(verticies, textCoords, indicies);
-        var Texture : Texture = mLoader.loadTexture('res/ts.png');
+        var Texture : Texture = mLoader.loadTexture('res/grid.png');
         var Rect : TexturedModel = new TexturedModel(Model, Texture);
         var mCamera : Camera = new Camera();
 
@@ -139,7 +143,7 @@ class main {
         
         mDisplayManager.updateDisplay(() : void => {
             mEntity.increasePosition(new Vec3(0,0,0))
-            mEntity.increaseRotation(new Vec3(0,1,0));
+            mEntity.increaseRotation(new Vec3(0,0,0));
             mCamera.move(code);
             mRenderer.preRender();
             mBasicShader.start();

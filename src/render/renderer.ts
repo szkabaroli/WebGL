@@ -34,7 +34,7 @@ export default class Renderer {
         this.gl.bindVertexArray(model.getModel().getVaoId());
         this.gl.enableVertexAttribArray(0);
         this.gl.enableVertexAttribArray(1);
-        
+
         var modelMatrix : Mat4 = Utils.createModelMatrix(entity.getPosition(), entity.getRotation(), entity.getScale());
 
         shader.loadModelMatrix(modelMatrix);
