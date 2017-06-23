@@ -2,15 +2,12 @@ import { Vec3 } from './math';
 
 class Camera {
 
-    private position : Vec3;
-    private rotation : Vec3;
-
     constructor() {
         this.position = new Vec3(0,0,0);
         this.rotation = new Vec3(0,0,0)
     }
 
-    public move(code : number) {
+    move(code) {
         if(code == 87) {
             this.position.z -= 0.01;
         }
@@ -31,11 +28,11 @@ class Camera {
         }
     }
 
-    public getPosition() : Vec3 {
+    getPosition() {
         return this.position;
     }
 
-    public getRotation() : Vec3 {
+    getRotation() {
         return this.rotation;
     }
 }

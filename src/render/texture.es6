@@ -1,11 +1,10 @@
 class Texture {
-    private textureId : number;
 
-    constructor(textureId : number) {
+    constructor(textureId) {
         this.textureId = textureId;
     }
 
-    public getTextureId() {
+    getTextureId() {
         return this.textureId;
     }
 }

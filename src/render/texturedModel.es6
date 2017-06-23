@@ -2,19 +2,17 @@ import Model from './model'
 import Texture from './texture'
 class TexturedModel {
     
-    private model : Model;
-    private texture : Texture;
 
-    constructor(model : Model, texture : Texture) {
+    constructor(model, texture) {
         this.model = model;
         this.texture = texture;
     }
 
-    public getModel() : Model {
+    getModel() {
         return this.model;
     }
  
-    public getTexture() : Texture {
+    getTexture() {
         return this.texture;
     }
 }
