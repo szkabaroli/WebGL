@@ -7,7 +7,7 @@ export default class Renderer {
     
     private gl : any
 
-    private FOV : number = 70;
+    private FOV : number = 90;
     private NEAR_PLANE : number = 0;
     private FAR_PLANE : number = 1000;
 
@@ -22,20 +22,22 @@ export default class Renderer {
     }
 
     public preRender() : void {
-        this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
-        this.gl.clearColor(0, 0, 0, 100);
+        this.gl.enable(this.gl.CULL_FACE);
+        this.gl.clearColor(0, 0, 0, 255);
+        this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+        this.gl.clear(this.gl.DEPTH_BUFFER_BIT);
     }
 
     public render(entity : Entity, shader : BasicShader) : void {
+        
         var model : TexturedModel = entity.getTexturedModel();
         this.gl.bindVertexArray(model.getModel().getVaoId());
         this.gl.enableVertexAttribArray(0);
         this.gl.enableVertexAttribArray(1);
         
-        var transformMatrix : Mat4 = 
-        Utils.createTransformMatrix(entity.getPosition(), entity.getRotation(), entity.getScale());
+        var modelMatrix : Mat4 = Utils.createModelMatrix(entity.getPosition(), entity.getRotation(), entity.getScale());
 
-        shader.loadTransformMatrix(transformMatrix);
+        shader.loadModelMatrix(modelMatrix);
 
         this.gl.activeTexture(this.gl.TEXTURE0);
         this.gl.bindTexture(this.gl.TEXTURE_2D, model.getTexture().getTextureId());

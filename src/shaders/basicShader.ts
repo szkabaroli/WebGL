@@ -1,19 +1,20 @@
 export const vertexShader = 
 `#version 300 es
 
-precision mediump float;
+precision highp float;
 
 in vec3 position;
 
 in vec2 textureCoords;
 
-uniform mat4 transformationMatrix;
+uniform mat4 modelMatrix;
 uniform mat4 projectionMatrix;
+uniform mat4 viewMatrix;
 
 out vec2 passedTextureCoords;
 
 void main(){
-    gl_Position = projectionMatrix * transformationMatrix * vec4(position, 1.0f);
+    gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0f);
     passedTextureCoords = textureCoords;
 } 
 `;
@@ -21,7 +22,7 @@ void main(){
 export const fragmentShader = 
 `#version 300 es
 
-precision mediump float;
+precision highp float;
 
 in vec2 passedTextureCoords;
 

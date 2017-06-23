@@ -1,3 +1,5 @@
+import Camera from './camera';
+
 export class Vec3 {
 
     public x : number;
@@ -8,6 +10,12 @@ export class Vec3 {
         this.x = x;
         this.y = y;
         this.z = z;
+    }
+
+    public invert() {
+        this.x = -this.x;
+        this.y = -this.y;
+        this.z = -this.z;
     }
 }
 
@@ -198,7 +206,7 @@ export class Utils {
         return deg * Math.PI / 180;
     }
 
-    public static createTransformMatrix(t : Vec3, r : Vec3, s : number) : Mat4 {
+    public static createModelMatrix(t : Vec3, r : Vec3, s : number) : Mat4 {
         var matrix = new Mat4();
         matrix.identity();
         matrix.translate(t);
@@ -222,6 +230,17 @@ export class Utils {
         matrix.m11 = -1;
         matrix.m14 = -(2 * NEAR_PLANE * FAR_PLANE) / frustumLength;
         matrix.m15 = 0;
+        return matrix;
+    }
+
+    public static createViewMatrix(camera : Camera) : Mat4 {
+        var matrix = new Mat4();
+        matrix.identity();
+        matrix.rotateX(this.toRad(camera.getRotation().x));
+        matrix.rotateY(this.toRad(camera.getRotation().x));
+        var cameraPos : Vec3 = camera.getPosition();
+        var invert = new Vec3(-cameraPos.x, -cameraPos.y, -cameraPos.z);
+        matrix.translate(invert);
         return matrix;
     }
 }
