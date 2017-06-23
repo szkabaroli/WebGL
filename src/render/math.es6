@@ -2,46 +2,20 @@ import Camera from './camera';
 
 export class Vec3 {
 
-    public x : number;
-    public y : number;
-    public z : number;
 
-    constructor(x : number, y : number, z : number) {
+    constructor(x = 0, y = 0, z = 0) {
         this.x = x;
         this.y = y;
         this.z = z;
     }
-
-    public invert() {
-        this.x = -this.x;
-        this.y = -this.y;
-        this.z = -this.z;
-    }
 }
 
 export class Mat4 {
-
-    public m00 : number;
-    public m01 : number;
-    public m02 : number;
-    public m03 : number;
-    public m04 : number;
-    public m05 : number;
-    public m06 : number;
-    public m07 : number;
-    public m08 : number;
-    public m09 : number;
-    public m10 : number;
-    public m11 : number;
-    public m12 : number;
-    public m13 : number;
-    public m14 : number;
-    public m15 : number;
     
-    constructor(m00 : number = 0, m01 : number = 0, m02 : number = 0, m03 : number = 0,
-                m04 : number = 0, m05 : number = 0, m06 : number = 0, m07 : number = 0,
-                m08 : number = 0, m09 : number = 0, m10 : number = 0, m11 : number = 0,
-                m12 : number = 0, m13 : number = 0, m14 : number = 0, m15 : number = 0) 
+    constructor(m00 = 0, m01 = 0, m02 = 0, m03 = 0,
+                m04 = 0, m05 = 0, m06 = 0, m07 = 0,
+                m08 = 0, m09 = 0, m10 = 0, m11 = 0,
+                m12 = 0, m13 = 0, m14 = 0, m15 = 0) 
     {
         this.m00 = m00;
         this.m01 = m01;
@@ -61,7 +35,7 @@ export class Mat4 {
         this.m15 = m15;
     }
 
-    public identity() {
+    identity() {
         this.m00 = 1;
 
         this.m01 = 0;
@@ -86,7 +60,7 @@ export class Mat4 {
         this.m15 = 1;
     }
 
-    public translate(v : Vec3) : void {
+    translate(v) {
         const x = v.x, y = v.y, z = v.z;
 
         this.m12 = this.m00 * x + this.m04 * y + this.m08 * z + this.m12;
@@ -95,7 +69,7 @@ export class Mat4 {
         this.m15 = this.m03 * x + this.m07 * y + this.m11 * z + this.m15;
     }
 
-    public scale(v : Vec3) : void {
+    scale(v) {
         const x = v.x, y = v.y, z = v.z;
 
         this.m00 = this.m00 * x;
@@ -112,7 +86,7 @@ export class Mat4 {
         this.m11 = this.m11 * z;
     }
 
-    public rotateX(rad : number) : void {
+    rotateX(rad) {
         let s = Math.sin(rad),
             c = Math.cos(rad),
             a10 = this.m04,
@@ -134,7 +108,7 @@ export class Mat4 {
         this.m11 = a23 * c - a13 * s;
     }
 
-    public rotateY(rad : number) : void {
+    rotateY(rad) {
         let s = Math.sin(rad),
             c = Math.cos(rad),
             a00 = this.m00,
@@ -156,7 +130,7 @@ export class Mat4 {
         this.m11 = a03 * s + a23 * c;
     }
 
-    public rotateZ(rad : number) : void {
+    rotateZ(rad) {
         let s = Math.sin(rad),
             c = Math.cos(rad),
             a00 = this.m00,
@@ -178,7 +152,7 @@ export class Mat4 {
         this.m07 = a13 * c - a03 * s;
     }
 
-    public toArray() : Float32Array {
+    toArray() {
         return new Float32Array([
             this.m00,
             this.m01,
@@ -202,11 +176,11 @@ export class Mat4 {
 
 export class Utils {
 
-    public static toRad(deg : number) : number{
+    static toRad(deg) {
         return deg * Math.PI / 180;
     }
 
-    public static createModelMatrix(t : Vec3, r : Vec3, s : number) : Mat4 {
+    static createModelMatrix(t,r,s) {
         var matrix = new Mat4();
         matrix.identity();
         matrix.translate(t);
@@ -217,7 +191,7 @@ export class Utils {
         return matrix;
     }
 
-    public static createProjectionMatrix(FOV : number, NEAR_PLANE : number, FAR_PLANE : number) : Mat4 {
+    static createProjectionMatrix(FOV , NEAR_PLANE , FAR_PLANE ) {
         const aspectRatio = window.innerWidth / window.innerHeight;
         const yScale = (1 / Math.tan(this.toRad(FOV / 2))) * aspectRatio;
         const xScale = yScale / aspectRatio;
@@ -233,12 +207,12 @@ export class Utils {
         return matrix;
     }
 
-    public static createViewMatrix(camera : Camera) : Mat4 {
+    static createViewMatrix(camera) {
         var matrix = new Mat4();
         matrix.identity();
         matrix.rotateX(this.toRad(camera.getRotation().x));
         matrix.rotateY(this.toRad(camera.getRotation().x));
-        var cameraPos : Vec3 = camera.getPosition();
+        var cameraPos = camera.getPosition();
         var invert = new Vec3(-cameraPos.x, -cameraPos.y, -cameraPos.z);
         matrix.translate(invert);
         return matrix;

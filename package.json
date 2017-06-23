@@ -5,14 +5,14 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "watchify -e src/app.ts -p [ tsify --noImplicitAny ] -o dist/bundle.js -v"
+    "build": "watchify -e src/app.es6 -o dist/bundle.js -t [ babelify --presets [ es2015 ] ] -v --extension=.es6"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "babel-preset-es2015": "^6.24.1",
+    "babelify": "^7.3.0",
     "browserify": "^14.4.0",
-    "tsify": "^3.0.1",
-    "typescript": "^2.3.4",
     "watchify": "^3.9.0"
   }
 }
