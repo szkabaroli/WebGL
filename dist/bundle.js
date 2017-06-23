@@ -9,6 +9,7 @@ var texturedModel_1 = require("./render/texturedModel");
 var entity_1 = require("./render/entity");
 var math_1 = require("./render/math");
 var camera_1 = require("./render/camera");
+var OBJLoader_1 = require("./render/OBJLoader");
 var main = (function () {
     function main() {
         //create display
@@ -85,8 +86,9 @@ var main = (function () {
             1, 1,
             1, 0
         ];
+        console.log(OBJLoader_1.default.loadOBJModel('res/test.txt', mLoader));
         var Model = mLoader.loadToVAO(verticies, textCoords, indicies);
-        var Texture = mLoader.loadTexture('res/ts.png');
+        var Texture = mLoader.loadTexture('res/grid.png');
         var Rect = new texturedModel_1.default(Model, Texture);
         var mCamera = new camera_1.default();
         var mEntity = new entity_1.default(Rect, new math_1.Vec3(0, 0, -1), new math_1.Vec3(0, 0, 0), 0.2);
@@ -119,7 +121,7 @@ var main = (function () {
         };
         mDisplayManager.updateDisplay(function () {
             mEntity.increasePosition(new math_1.Vec3(0, 0, 0));
-            mEntity.increaseRotation(new math_1.Vec3(0, 1, 0));
+            mEntity.increaseRotation(new math_1.Vec3(0, 0, 0));
             mCamera.move(code);
             mRenderer.preRender();
             mBasicShader.start();
@@ -133,7 +135,27 @@ var main = (function () {
 }());
 new main;
 
-},{"./render/basicshader":2,"./render/camera":3,"./render/context":4,"./render/entity":5,"./render/loader":6,"./render/math":7,"./render/renderer":9,"./render/texturedModel":12}],2:[function(require,module,exports){
+},{"./render/OBJLoader":2,"./render/basicshader":3,"./render/camera":4,"./render/context":5,"./render/entity":6,"./render/loader":7,"./render/math":8,"./render/renderer":10,"./render/texturedModel":13}],2:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var OBJLoader = (function () {
+    function OBJLoader() {
+    }
+    OBJLoader.loadOBJModel = function (fileName, loader) {
+        var rawFile = new XMLHttpRequest();
+        rawFile.open("GET", fileName, true);
+        rawFile.onreadystatechange = function () {
+            if (rawFile.readyState === 4) {
+                return rawFile.responseText;
+            }
+        };
+        rawFile.send();
+    };
+    return OBJLoader;
+}());
+exports.default = OBJLoader;
+
+},{}],3:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -177,7 +199,7 @@ var BasicShader = (function (_super) {
 }(shaderprogram_1.default));
 exports.default = BasicShader;
 
-},{"../shaders/basicShader":13,"./math":7,"./shaderprogram":10}],3:[function(require,module,exports){
+},{"../shaders/basicShader":14,"./math":8,"./shaderprogram":11}],4:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var math_1 = require("./math");
@@ -216,7 +238,7 @@ var Camera = (function () {
 }());
 exports.default = Camera;
 
-},{"./math":7}],4:[function(require,module,exports){
+},{"./math":8}],5:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var DisplayManager = (function () {
@@ -241,7 +263,7 @@ var DisplayManager = (function () {
 }());
 exports.default = DisplayManager;
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Entity = (function () {
@@ -277,7 +299,7 @@ var Entity = (function () {
 }());
 exports.default = Entity;
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var model_1 = require("./model");
@@ -333,7 +355,7 @@ var Loader = (function () {
 }());
 exports.default = Loader;
 
-},{"./model":8,"./texture":11}],7:[function(require,module,exports){
+},{"./model":9,"./texture":12}],8:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Vec3 = (function () {
@@ -525,7 +547,7 @@ var Utils = (function () {
 }());
 exports.Utils = Utils;
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Model = (function () {
@@ -543,7 +565,7 @@ var Model = (function () {
 }());
 exports.default = Model;
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var math_1 = require("./math");
@@ -582,7 +604,7 @@ var Renderer = (function () {
 }());
 exports.default = Renderer;
 
-},{"./math":7}],10:[function(require,module,exports){
+},{"./math":8}],11:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ShaderProgram = (function () {
@@ -642,7 +664,7 @@ var ShaderProgram = (function () {
 }());
 exports.default = ShaderProgram;
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Texture = (function () {
@@ -656,7 +678,7 @@ var Texture = (function () {
 }());
 exports.default = Texture;
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var TexturedModel = (function () {
@@ -674,7 +696,7 @@ var TexturedModel = (function () {
 }());
 exports.default = TexturedModel;
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.vertexShader = "#version 300 es\n\nprecision highp float;\n\nin vec3 position;\n\nin vec2 textureCoords;\n\nuniform mat4 modelMatrix;\nuniform mat4 projectionMatrix;\nuniform mat4 viewMatrix;\n\nout vec2 passedTextureCoords;\n\nvoid main(){\n    gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0f);\n    passedTextureCoords = textureCoords;\n} \n";
