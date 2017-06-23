@@ -4,38 +4,32 @@ import TexturedModel from './texturedModel';
 import { Utils, Vec3, Mat4 } from './math';
 
 export default class Renderer {
+
     
-    private gl : any
 
-    private FOV : number = 90;
-    private NEAR_PLANE : number = 0;
-    private FAR_PLANE : number = 1000;
-
-    private projectionMatrix : Mat4;
-
-    constructor(gl : any, shader : BasicShader) {
+    constructor(gl, shader) {
         this.gl = gl;
-        const matrix : Mat4 = Utils.createProjectionMatrix(this.FOV, this.NEAR_PLANE, this.FAR_PLANE);
+        const matrix = Utils.createProjectionMatrix(90, 0, 1000);
         shader.start();
         shader.loadProjectionMatrix(matrix);
         shader.stop();
     }
 
-    public preRender() : void {
+    preRender() {
         this.gl.enable(this.gl.CULL_FACE);
         this.gl.clearColor(0, 0, 0, 255);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT);
         this.gl.clear(this.gl.DEPTH_BUFFER_BIT);
     }
 
-    public render(entity : Entity, shader : BasicShader) : void {
+    render(entity, shader) {
         
-        var model : TexturedModel = entity.getTexturedModel();
+        var model = entity.getTexturedModel();
         this.gl.bindVertexArray(model.getModel().getVaoId());
         this.gl.enableVertexAttribArray(0);
         this.gl.enableVertexAttribArray(1);
         
-        var modelMatrix : Mat4 = Utils.createModelMatrix(entity.getPosition(), entity.getRotation(), entity.getScale());
+        var modelMatrix = Utils.createModelMatrix(entity.getPosition(), entity.getRotation(), entity.getScale());
 
         shader.loadModelMatrix(modelMatrix);
 

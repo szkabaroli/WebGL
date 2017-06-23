@@ -1,13 +1,8 @@
 import { vertexShader, fragmentShader } from '../shaders/basicShader';
 import { Mat4, Vec3 } from './math';
-abstract class ShaderProgram{
-    
-    private gl : any;
-    private vertexShaderId : number;
-    private fragmentShaderId : number;
-    private programId : number
+class ShaderProgram{
 
-    constructor(gl: any, vertexShader : string, fragmentShader : string) {
+    constructor(gl, vertexShader, fragmentShader) {
         this.gl = gl;
         this.vertexShaderId = this.loadShader(vertexShader, this.gl.VERTEX_SHADER);
         this.fragmentShaderId = this.loadShader(fragmentShader, this.gl.FRAGMENT_SHADER);
@@ -22,47 +17,47 @@ abstract class ShaderProgram{
 
     
 
-    public start() : void {
+    start() {
         this.gl.useProgram(this.programId)
     }
 
-    public stop() : void {
+    stop(){
         this.gl.useProgram(null)
     }
 
-    protected bindAttributes() : void {/*child*/}
-    protected getUniformLocations() : void {/*child*/}
+    bindAttributes() {/*child*/}
+    getUniformLocations() {/*child*/}
 
-    protected loadFloat(location : number, value : number) : void {
+    loadFloat(location , value) {
         this.gl.uniform1f(location, value);
     }
 
-    protected loadBool(location : number, value : boolean) : void {
-        var load : number = 0;
+    loadBool(location, value) {
+        var load = 0;
         if(value) {
             load = 1;
         }
         this.gl.uniform1i(location, load);
     }
 
-    protected loadVector(location : number, vector : Vec3) : void {
+    loadVector(location, vector) {
         this.gl.uniform3f(location, vector.x, vector.y, vector.z);
     }
 
-    protected loadMatrix(location : number, matrix : Mat4) : void {
+    loadMatrix(location, matrix) {
         this.gl.uniformMatrix4fv(location, false, matrix.toArray()); 
     }
 
-    protected getUniformLocation(unifomrName : string) : any {
+    getUniformLocation(unifomrName) {
         return this.gl.getUniformLocation(this.programId, unifomrName);
     }
 
-    protected bindAttribute(attribute : number, attrName : string) : void {
+    bindAttribute(attribute, attrName) {
         this.gl.bindAttribLocation(this.programId, attribute, attrName);
     }
 
-    private loadShader(shaderSource : string, type : number) : number {
-        var shaderId : number = this.gl.createShader(type);
+    loadShader(shaderSource, type) {
+        var shaderId = this.gl.createShader(type);
         this.gl.shaderSource(shaderId, shaderSource);
         this.gl.compileShader(shaderId);
         if (!this.gl.getShaderParameter(shaderId, this.gl.COMPILE_STATUS)) {
