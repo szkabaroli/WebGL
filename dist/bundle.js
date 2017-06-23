@@ -14,9 +14,9 @@ var main = (function () {
         var mDisplayManager = new context_1.default();
         this.gl = mDisplayManager.createDisplay('gl');
         //create loader and renderer
-        var mRenderer = new renderer_1.default(this.gl);
         var mLoader = new loader_1.default(this.gl);
         var mBasicShader = new basicshader_1.default(this.gl);
+        var mRenderer = new renderer_1.default(this.gl, mBasicShader);
         //rectangle verticies
         var verticies = [
             -0.5, 0.5, 0.0,
@@ -37,11 +37,10 @@ var main = (function () {
         var Model = mLoader.loadToVAO(verticies, textCoords, indicies);
         var Texture = mLoader.loadTexture('res/ts.png');
         var Rect = new texturedModel_1.default(Model, Texture);
-        var mEntity = new entity_1.default(Rect, new math_1.Vec3(-1, 0, 0), new math_1.Vec3(0, 0, 0), 0.2);
+        var mEntity = new entity_1.default(Rect, new math_1.Vec3(0, 0, -0.1), new math_1.Vec3(0, 0, 0), 0.01);
         //Main loop
         mDisplayManager.updateDisplay(function () {
-            mEntity.increasePosition(new math_1.Vec3(0.002, 0, 0));
-            mEntity.increaseRotation(new math_1.Vec3(1, 1, 0));
+            mEntity.increaseRotation(new math_1.Vec3(0.1, 1, 1));
             mRenderer.preRender();
             mBasicShader.start();
             mRenderer.render(mEntity, mBasicShader);
@@ -372,7 +371,13 @@ var Utils = (function () {
         var xScale = yScale / aspectRatio;
         var frustumLength = FAR_PLANE - NEAR_PLANE;
         var matrix = new Mat4();
-        return;
+        matrix.m00 = xScale;
+        matrix.m05 = yScale;
+        matrix.m10 = -((FAR_PLANE + NEAR_PLANE) / frustumLength);
+        matrix.m11 = -1;
+        matrix.m14 = -(2 * NEAR_PLANE * FAR_PLANE) / frustumLength;
+        matrix.m15 = 0;
+        return matrix;
     };
     return Utils;
 }());
@@ -401,8 +406,15 @@ exports.default = Model;
 Object.defineProperty(exports, "__esModule", { value: true });
 var math_1 = require("./math");
 var Renderer = (function () {
-    function Renderer(gl) {
+    function Renderer(gl, shader) {
+        this.FOV = 70;
+        this.NEAR_PLANE = 0;
+        this.FAR_PLANE = 1000;
         this.gl = gl;
+        var matrix = math_1.Utils.createProjectionMatrix(this.FOV, this.NEAR_PLANE, this.FAR_PLANE);
+        shader.start();
+        shader.loadProjectionMatrix(matrix);
+        shader.stop();
     }
     Renderer.prototype.preRender = function () {
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
@@ -424,9 +436,6 @@ var Renderer = (function () {
     };
     return Renderer;
 }());
-Renderer.FOV = 70;
-Renderer.NEAR_PLANE = 0.1;
-Renderer.FAR_PLANE = 1000;
 exports.default = Renderer;
 
 },{"./math":6}],9:[function(require,module,exports){
@@ -524,7 +533,7 @@ exports.default = TexturedModel;
 },{}],12:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.vertexShader = "#version 300 es\n\nprecision mediump float;\n\nin vec3 position;\n\nin vec2 textureCoords;\n\nuniform mat4 transformationMatrix;\nuniform mat4 projectionMatrix;\n\nout vec2 passedTextureCoords;\n\nvoid main(){\n    gl_Position = transformationMatrix * vec4(position, 1.0f);\n    passedTextureCoords = textureCoords;\n} \n";
+exports.vertexShader = "#version 300 es\n\nprecision mediump float;\n\nin vec3 position;\n\nin vec2 textureCoords;\n\nuniform mat4 transformationMatrix;\nuniform mat4 projectionMatrix;\n\nout vec2 passedTextureCoords;\n\nvoid main(){\n    gl_Position = projectionMatrix * transformationMatrix * vec4(position, 1.0f);\n    passedTextureCoords = textureCoords;\n} \n";
 exports.fragmentShader = "#version 300 es\n\nprecision mediump float;\n\nin vec2 passedTextureCoords;\n\nuniform sampler2D textureSampler;\n\nout vec4 out_Color;\n\nvoid main() {\n    out_Color = texture(textureSampler, passedTextureCoords);\n}";
 
 },{}]},{},[1]);

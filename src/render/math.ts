@@ -13,22 +13,22 @@ export class Vec3 {
 
 export class Mat4 {
 
-    private m00 : number;
-    private m01 : number;
-    private m02 : number;
-    private m03 : number;
-    private m04 : number;
-    private m05 : number;
-    private m06 : number;
-    private m07 : number;
-    private m08 : number;
-    private m09 : number;
-    private m10 : number;
-    private m11 : number;
-    private m12 : number;
-    private m13 : number;
-    private m14 : number;
-    private m15 : number;
+    public m00 : number;
+    public m01 : number;
+    public m02 : number;
+    public m03 : number;
+    public m04 : number;
+    public m05 : number;
+    public m06 : number;
+    public m07 : number;
+    public m08 : number;
+    public m09 : number;
+    public m10 : number;
+    public m11 : number;
+    public m12 : number;
+    public m13 : number;
+    public m14 : number;
+    public m15 : number;
     
     constructor(m00 : number = 0, m01 : number = 0, m02 : number = 0, m03 : number = 0,
                 m04 : number = 0, m05 : number = 0, m06 : number = 0, m07 : number = 0,
@@ -216,6 +216,12 @@ export class Utils {
         const frustumLength = FAR_PLANE - NEAR_PLANE;
 
         let matrix = new Mat4();
-        return
+        matrix.m00 = xScale;
+        matrix.m05 = yScale;
+        matrix.m10 = -((FAR_PLANE + NEAR_PLANE) / frustumLength);
+        matrix.m11 = -1;
+        matrix.m14 = -(2 * NEAR_PLANE * FAR_PLANE) / frustumLength;
+        matrix.m15 = 0;
+        return matrix;
     }
 }

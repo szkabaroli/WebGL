@@ -13,7 +13,7 @@ uniform mat4 projectionMatrix;
 out vec2 passedTextureCoords;
 
 void main(){
-    gl_Position = transformationMatrix * vec4(position, 1.0f);
+    gl_Position = projectionMatrix * transformationMatrix * vec4(position, 1.0f);
     passedTextureCoords = textureCoords;
 } 
 `;

@@ -19,9 +19,9 @@ class main {
         this.gl = mDisplayManager.createDisplay('gl');
 
         //create loader and renderer
-        var mRenderer : Renderer = new Renderer(this.gl)
         var mLoader : Loader = new Loader(this.gl)
         var mBasicShader : BasicShader = new BasicShader(this.gl);
+        var mRenderer : Renderer = new Renderer(this.gl, mBasicShader);
 
         //rectangle verticies
         var verticies : number[] = [
@@ -48,13 +48,12 @@ class main {
         var Texture : Texture = mLoader.loadTexture('res/ts.png');
         var Rect : TexturedModel = new TexturedModel(Model, Texture);
 
-        var mEntity : Entity = new Entity(Rect, new Vec3(-1,0,0), new Vec3(0,0,0), 0.2);
+        var mEntity : Entity = new Entity(Rect, new Vec3(0,0,-0.1), new Vec3(0,0,0), 0.01);
 
         //Main loop
         
         mDisplayManager.updateDisplay(() : void => {
-            mEntity.increasePosition(new Vec3(0.002, 0,0));
-            mEntity.increaseRotation(new Vec3(1, 1,0));
+            mEntity.increaseRotation(new Vec3(0.1, 1,1));
             mRenderer.preRender();
             mBasicShader.start();
             mRenderer.render(mEntity, mBasicShader);
