@@ -2,7 +2,7 @@ import Loader from './loader';
 
 class OBJLoader {
 
-    public static loadOBJModel(fileName : string, loader : Loader) {
+    static loadOBJModel(fileName, loader) {
         var rawFile = new XMLHttpRequest();
         rawFile.open("GET", fileName, true);
         rawFile.onreadystatechange = function ()
