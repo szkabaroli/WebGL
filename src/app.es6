@@ -104,21 +104,12 @@ class main {
             1,0
         ]
 
-        console.log(OBJLoader.loadOBJModel('res/test.txt', mLoader));
+        OBJLoader.loadOBJModel('res/test.txt', mLoader);
         
-        
-        
-<<<<<<< HEAD:src/app.ts
-        var Model : Model = mLoader.loadToVAO(verticies, textCoords, indicies);
-        var Texture : Texture = mLoader.loadTexture('res/grid.png');
-        var Rect : TexturedModel = new TexturedModel(Model, Texture);
-        var mCamera : Camera = new Camera();
-=======
         var Model = mLoader.loadToVAO(verticies, textCoords, indicies);
         var Texture = mLoader.loadTexture('res/ts.png');
         var Rect = new TexturedModel(Model, Texture);
         var mCamera = new Camera();
->>>>>>> 7e8057c854eaaa3b6e212b964186e33ed7008274:src/app.es6
 
         var mEntity = new Entity(Rect, new Vec3(0,0,-1), new Vec3(0,0,0), 0.2);
         var code = 0;
@@ -148,7 +139,7 @@ class main {
         
         mDisplayManager.updateDisplay(() => {
             mEntity.increasePosition(new Vec3(0,0,0))
-            mEntity.increaseRotation(new Vec3(0,0,0));
+            mEntity.increaseRotation(new Vec3(1,1,0));
             mCamera.move(code);
             mRenderer.preRender();
             mBasicShader.start();

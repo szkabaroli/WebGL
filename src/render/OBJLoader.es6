@@ -3,16 +3,15 @@ import Loader from './loader';
 class OBJLoader {
 
     static loadOBJModel(fileName, loader) {
-        var rawFile = new XMLHttpRequest();
-        rawFile.open("GET", fileName, true);
-        rawFile.onreadystatechange = function ()
-        {
-            if(rawFile.readyState === 4)
-            {
-                    return rawFile.responseText;
-            }
+        function onLoad () {
+            const lines = this.responseText.split('\n');
+            console.log(lines);
         }
-        rawFile.send();
+
+        var xhr = new XMLHttpRequest();
+        xhr.addEventListener("load", onLoad);
+        xhr.open("GET", fileName);
+        xhr.send();
 
 
     }
