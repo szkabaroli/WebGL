@@ -9,21 +9,21 @@ export default class Renderer {
 
     constructor(gl, shader) {
         this.gl = gl;
-        const matrix = Utils.createProjectionMatrix(90, 0, 1000);
-        shader.start();
-        shader.loadProjectionMatrix(matrix);
-        shader.stop();
     }
 
     preRender() {
+        this.gl.enable(this.gl.DEPTH_TEST);
         this.gl.enable(this.gl.CULL_FACE);
         this.gl.clearColor(0, 0, 0, 255);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT);
         this.gl.clear(this.gl.DEPTH_BUFFER_BIT);
+        this.gl.viewport(0,0,window.innerWidth, window.innerHeight);
     }
 
     render(entity, shader) {
         
+        const matrix = Utils.createProjectionMatrix(90, 0.001, 1000);
+        shader.loadProjectionMatrix(matrix);
         var model = entity.getTexturedModel();
         this.gl.bindVertexArray(model.getModel().getVaoId());
         this.gl.enableVertexAttribArray(0);

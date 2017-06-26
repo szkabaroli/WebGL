@@ -57,7 +57,7 @@ var main = function main() {
     //create loader and renderer
     var mLoader = new _loader2.default(this.gl);
     var mBasicShader = new _basicshader2.default(this.gl);
-    var mRenderer = new _renderer2.default(this.gl, mBasicShader);
+    var mRenderer = new _renderer2.default(this.gl);
 
     //rectangle verticies
     var verticies = [-1, 1, -1, -1, -1, -1, 1, -1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1, -1, 1, 1, 1, 1, 1, 1, -1, 1, -1, -1, 1, -1, 1, 1, 1, 1, -1, 1, -1, -1, -1, -1, -1, -1, 1, -1, 1, 1, -1, 1, 1, -1, 1, -1, 1, 1, -1, 1, 1, 1, -1, -1, 1, -1, -1, -1, 1, -1, -1, 1, -1, 1];
@@ -66,48 +66,53 @@ var main = function main() {
     7, 5, 6, 11, 9, 8, 10, 9, 11, 12, 13, 15, 15, 13, 14, 19, 17, 16, 18, 17, 19, 20, 21, 23, 23, 21, 22];
 
     var textCoords = [0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0];
+    var model = _OBJLoader2.default.loadOBJModel('res/cube.obj', mLoader);
+    console.log({ i: indicies, v: verticies, t: textCoords });
+    console.log(model);
 
-    _OBJLoader2.default.loadOBJModel('res/test.txt', mLoader);
+    setTimeout(function () {
+        var Model = mLoader.loadToVAO(model.v, model.t, model.i);
+        var Texture = mLoader.loadTexture('res/white.jpg');
+        var Cube = new _texturedModel2.default(Model, Texture);
+        var mCamera = new _camera2.default();
 
-    var Model = mLoader.loadToVAO(verticies, textCoords, indicies);
-    var Texture = mLoader.loadTexture('res/ts.png');
-    var Rect = new _texturedModel2.default(Model, Texture);
-    var mCamera = new _camera2.default();
+        var mEntity = new _entity2.default(Cube, new _math.Vec3(0, 0, 0), new _math.Vec3(0, 0, 0), 0.2);
 
-    var mEntity = new _entity2.default(Rect, new _math.Vec3(0, 0, -1), new _math.Vec3(0, 0, 0), 0.2);
-    var code = 0;
+        var code = 0;
 
-    document.onkeydown = function (e) {
-        if (e.keyCode == 87) {
-            code = 87;
-        } else if (e.keyCode == 83) {
-            code = 83;
-        } else if (e.keyCode == 68) {
-            code = 68;
-        } else if (e.keyCode == 65) {
-            code = 65;
-        } else if (e.keyCode == 81) {
-            code = 81;
-        } else if (e.keyCode == 81) {
-            code = 81;
-        } else if (e.keyCode == 69) {
-            code = 69;
-        }
-    };
-    document.onkeyup = function () {
-        code = 0;
-    };
+        document.onkeydown = function (e) {
+            if (e.keyCode == 87) {
+                code = 87;
+            } else if (e.keyCode == 83) {
+                code = 83;
+            } else if (e.keyCode == 68) {
+                code = 68;
+            } else if (e.keyCode == 65) {
+                code = 65;
+            } else if (e.keyCode == 81) {
+                code = 81;
+            } else if (e.keyCode == 81) {
+                code = 81;
+            } else if (e.keyCode == 69) {
+                code = 69;
+            }
+        };
+        document.onkeyup = function () {
+            code = 0;
+        };
 
-    mDisplayManager.updateDisplay(function () {
-        mEntity.increasePosition(new _math.Vec3(0, 0, 0));
-        mEntity.increaseRotation(new _math.Vec3(1, 1, 0));
-        mCamera.move(code);
-        mRenderer.preRender();
-        mBasicShader.start();
-        mBasicShader.loadViewMatrix(mCamera);
-        mRenderer.render(mEntity, mBasicShader);
-        mBasicShader.stop();
-    });
+        mDisplayManager.updateDisplay(function () {
+            mDisplayManager.resize();
+            mEntity.increasePosition(new _math.Vec3(0, 0, 0));
+            mEntity.increaseRotation(new _math.Vec3(0, 0, 0));
+            mCamera.move(code);
+            mRenderer.preRender();
+            mBasicShader.start();
+            mBasicShader.loadViewMatrix(mCamera);
+            mRenderer.render(mEntity, mBasicShader);
+            mBasicShader.stop();
+        });
+    }, 1000);
 
     //mLoader.cleanUp();
 };
@@ -127,6 +132,8 @@ var _loader = require('./loader');
 
 var _loader2 = _interopRequireDefault(_loader);
 
+var _math = require('./math');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -139,15 +146,69 @@ var OBJLoader = function () {
     _createClass(OBJLoader, null, [{
         key: 'loadOBJModel',
         value: function loadOBJModel(fileName, loader) {
-            function onLoad() {
-                var lines = this.responseText.split('\n');
-                console.log(lines);
-            }
+            var cVertices = [];
+            var cTextures = [];
+            var cNormals = [];
+            var cIndicies = [];
+            var aCache = [];
 
+            //final
+            var fIndicies = [];
+            var fIndexCnt = 0;
+            var fTextures = [];
+            var fNormals = [];
+            var fVertices = [];
+
+            //load file via ajax
             var xhr = new XMLHttpRequest();
             xhr.addEventListener("load", onLoad);
             xhr.open("GET", fileName);
             xhr.send();
+
+            function onLoad() {
+
+                var lines = this.responseText.split('\n');
+
+                lines.forEach(function (line) {
+
+                    var currentLine = line.split(' ');
+                    switch (currentLine[0]) {
+                        case 'v':
+                            cVertices.push(parseFloat(currentLine[1]), parseFloat(currentLine[2]), parseFloat(currentLine[3]));
+                            break;
+                        case 'vt':
+                            cTextures.push(parseFloat(currentLine[1]), parseFloat(currentLine[2]));
+                            break;
+                        case 'vn':
+                            cNormals.push(parseFloat(currentLine[1]), parseFloat(currentLine[2]), parseFloat(currentLine[3]));
+                            break;
+                        case 'f':
+
+                            for (var i = 1; i < currentLine.length; i++) {
+                                if (currentLine[i] in aCache) {
+                                    fIndicies.push(aCache[currentLine[i]]); //it has, add its index to the list.
+                                } else {
+                                    var vtn = currentLine[i].split('/');
+                                    var ind = (parseInt(vtn[0]) - 1) * 3;
+                                    fVertices.push(cVertices[ind], cVertices[ind + 1], cVertices[ind + 2]);
+
+                                    ind = (parseInt(vtn[1]) - 1) * 2;
+                                    fTextures.push(cTextures[ind], cTextures[ind + 1]);
+
+                                    ind = (parseInt(vtn[2]) - 1) * 3;
+                                    fNormals.push(cNormals[ind], cNormals[ind + 1], cNormals[ind + 2]);
+
+                                    aCache[currentLine[i]] = fIndexCnt;
+                                    fIndicies.push(fIndexCnt);
+                                    fIndexCnt++;
+                                }
+                            }
+                            break;
+
+                    }
+                });
+            }
+            return { i: fIndicies, v: fVertices, /*n: fNormals,*/t: fTextures };
         }
     }]);
 
@@ -156,7 +217,7 @@ var OBJLoader = function () {
 
 exports.default = OBJLoader;
 
-},{"./loader":7}],3:[function(require,module,exports){
+},{"./loader":7,"./math":8}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -334,6 +395,18 @@ var DisplayManager = function () {
                 _this.updateDisplay(callback);
             });
         }
+    }, {
+        key: 'resize',
+        value: function resize() {
+            var displayWidth = window.innerWidth;
+            var displayHeight = window.innerHeight;
+
+            if (this.canvas.width != displayWidth || this.canvas.height != displayHeight) {
+
+                this.canvas.width = displayWidth;
+                this.canvas.height = displayHeight;
+            }
+        }
     }]);
 
     return DisplayManager;
@@ -508,7 +581,7 @@ exports.default = Loader;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.Utils = exports.Mat4 = exports.Vec3 = undefined;
+exports.Utils = exports.Mat4 = exports.Vec2 = exports.Vec3 = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -530,6 +603,16 @@ var Vec3 = exports.Vec3 = function Vec3() {
     this.x = x;
     this.y = y;
     this.z = z;
+};
+
+var Vec2 = exports.Vec2 = function Vec2() {
+    var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+    var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+
+    _classCallCheck(this, Vec2);
+
+    this.x = x;
+    this.y = y;
 };
 
 var Mat4 = exports.Mat4 = function () {
@@ -832,24 +915,24 @@ var Renderer = function () {
         _classCallCheck(this, Renderer);
 
         this.gl = gl;
-        var matrix = _math.Utils.createProjectionMatrix(90, 0, 1000);
-        shader.start();
-        shader.loadProjectionMatrix(matrix);
-        shader.stop();
     }
 
     _createClass(Renderer, [{
         key: 'preRender',
         value: function preRender() {
+            this.gl.enable(this.gl.DEPTH_TEST);
             this.gl.enable(this.gl.CULL_FACE);
             this.gl.clearColor(0, 0, 0, 255);
             this.gl.clear(this.gl.COLOR_BUFFER_BIT);
             this.gl.clear(this.gl.DEPTH_BUFFER_BIT);
+            this.gl.viewport(0, 0, window.innerWidth, window.innerHeight);
         }
     }, {
         key: 'render',
         value: function render(entity, shader) {
 
+            var matrix = _math.Utils.createProjectionMatrix(90, 0.001, 1000);
+            shader.loadProjectionMatrix(matrix);
             var model = entity.getTexturedModel();
             this.gl.bindVertexArray(model.getModel().getVaoId());
             this.gl.enableVertexAttribArray(0);

@@ -9,8 +9,6 @@ class DisplayManager {
         this.canvas.height = window.innerHeight;
         this.gl = this.canvas.getContext('webgl2');
         return this.gl;
-
-
     }
 
     updateDisplay(callback) {
@@ -20,6 +18,18 @@ class DisplayManager {
             this.updateDisplay(callback);
         })
 
+    }
+
+    resize() {
+        var displayWidth  = window.innerWidth;
+        var displayHeight = window.innerHeight;
+ 
+        if (this.canvas.width  != displayWidth ||
+            this.canvas.height != displayHeight) {
+ 
+        this.canvas.width  = displayWidth;
+        this.canvas.height = displayHeight;
+  }
     }
 }
 

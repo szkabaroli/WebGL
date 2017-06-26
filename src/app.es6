@@ -21,7 +21,7 @@ class main {
         //create loader and renderer
         const mLoader = new Loader(this.gl)
         const mBasicShader = new BasicShader(this.gl);
-        const mRenderer = new Renderer(this.gl, mBasicShader);
+        const mRenderer = new Renderer(this.gl);
         
 
         //rectangle verticies
@@ -103,15 +103,18 @@ class main {
             1,1,
             1,0
         ]
+        var model = OBJLoader.loadOBJModel('res/cube.obj', mLoader);
+        console.log({i : indicies, v : verticies, t : textCoords})
+        console.log(model)
 
-        OBJLoader.loadOBJModel('res/test.txt', mLoader);
-        
-        var Model = mLoader.loadToVAO(verticies, textCoords, indicies);
-        var Texture = mLoader.loadTexture('res/ts.png');
-        var Rect = new TexturedModel(Model, Texture);
+        setTimeout(()=> {
+            var Model = mLoader.loadToVAO(model.v, model.t, model.i);
+        var Texture = mLoader.loadTexture('res/white.jpg');
+        var Cube = new TexturedModel(Model, Texture);
         var mCamera = new Camera();
 
-        var mEntity = new Entity(Rect, new Vec3(0,0,-1), new Vec3(0,0,0), 0.2);
+        var mEntity = new Entity(Cube, new Vec3(0,0,0), new Vec3(0,0,0), 0.2);
+        
         var code = 0;
 
         document.onkeydown = (e) => {
@@ -136,10 +139,10 @@ class main {
         }
 
         
-        
         mDisplayManager.updateDisplay(() => {
+            mDisplayManager.resize();
             mEntity.increasePosition(new Vec3(0,0,0))
-            mEntity.increaseRotation(new Vec3(1,1,0));
+            mEntity.increaseRotation(new Vec3(0,0,0));
             mCamera.move(code);
             mRenderer.preRender();
             mBasicShader.start();
@@ -147,6 +150,9 @@ class main {
             mRenderer.render(mEntity, mBasicShader);
             mBasicShader.stop();
         })
+        
+        }, 1000)
+
         
         //mLoader.cleanUp();
     }
