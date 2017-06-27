@@ -63,17 +63,17 @@ var main = function main() {
     var mBasicShader = new _basicshader2.default(this.gl);
     var mRenderer = new _renderer2.default(this.gl);
 
-    var model = _OBJLoader2.default.loadOBJModel('res/test.obj', mLoader);
+    var model = _OBJLoader2.default.loadOBJModel('res/cube.obj', mLoader);
 
     setTimeout(function () {
         var Model = mLoader.loadToVAO(model.v, model.t, model.n, model.i);
-        var Texture = mLoader.loadTexture('res/ts.png');
+        var Texture = mLoader.loadTexture('res/grid.png');
         var Cube = new _texturedModel2.default(Model, Texture);
-        var mCamera = new _camera2.default();
+        var mCamera = new _camera2.default(new _math.Vec3(0, 2, 0), new _math.Vec3(45, 0, 0));
 
-        var mEntity = new _entity2.default(Cube, new _math.Vec3(2, 0, -1), new _math.Vec3(0, 0, 0), 0.2);
-        var mEntity2 = new _entity2.default(Cube, new _math.Vec3(-1, 0, -2), new _math.Vec3(0, 0, 0), 0.2);
-        var mLight = new _light2.default(new _math.Vec3(-1, -0.1, -1), new _math.Vec3(2, 2, 1));
+        var mEntity = new _entity2.default(Cube, new _math.Vec3(0, 1, 0), new _math.Vec3(0, 0, 0), 0.2);
+        var mEntity2 = new _entity2.default(Cube, new _math.Vec3(20, -40, 0), new _math.Vec3(0, 0, 0), 20);
+        var mLight = new _light2.default(new _math.Vec3(-1, 10, -1), new _math.Vec3(1, 1, 1));
 
         var code = 0;
 
@@ -101,7 +101,7 @@ var main = function main() {
         mDisplayManager.updateDisplay(function () {
             mDisplayManager.resize();
             mEntity.increasePosition(new _math.Vec3(0, 0, 0));
-            mEntity.increaseRotation(new _math.Vec3(1, 1, 0));
+            mEntity.increaseRotation(new _math.Vec3(0, 1, 0));
             mCamera.move(code);
             mRenderer.preRender();
             mBasicShader.start();
@@ -315,33 +315,33 @@ var _math = require('./math');
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Camera = function () {
-    function Camera() {
+    function Camera(position, rotation) {
         _classCallCheck(this, Camera);
 
-        this.position = new _math.Vec3(0, 0, 0);
-        this.rotation = new _math.Vec3(0, 0, 0);
+        this.position = position;
+        this.rotation = rotation;
     }
 
     _createClass(Camera, [{
         key: 'move',
         value: function move(code) {
             if (code == 87) {
-                this.position.z -= 0.01;
+                this.position.z -= 0.02;
             }
             if (code == 83) {
-                this.position.z += 0.01;
+                this.position.z += 0.02;
             }
             if (code == 68) {
-                this.position.x += 0.01;
+                this.position.x += 0.02;
             }
             if (code == 65) {
-                this.position.x -= 0.01;
+                this.position.x -= 0.02;
             }
             if (code == 69) {
-                this.position.y += 0.01;
+                this.position.y += 0.02;
             }
             if (code == 81) {
-                this.position.y -= 0.01;
+                this.position.y -= 0.02;
             }
         }
     }, {
@@ -883,7 +883,7 @@ var Utils = exports.Utils = function () {
             var matrix = new Mat4();
             matrix.identity();
             matrix.rotateX(this.toRad(camera.getRotation().x));
-            matrix.rotateY(this.toRad(camera.getRotation().x));
+            matrix.rotateY(this.toRad(camera.getRotation().y));
             var cameraPos = camera.getPosition();
             var invert = new Vec3(-cameraPos.x, -cameraPos.y, -cameraPos.z);
             matrix.translate(invert);

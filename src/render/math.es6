@@ -216,7 +216,7 @@ export class Utils {
         var matrix = new Mat4();
         matrix.identity();
         matrix.rotateX(this.toRad(camera.getRotation().x));
-        matrix.rotateY(this.toRad(camera.getRotation().x));
+        matrix.rotateY(this.toRad(camera.getRotation().y));
         var cameraPos = camera.getPosition();
         var invert = new Vec3(-cameraPos.x, -cameraPos.y, -cameraPos.z);
         matrix.translate(invert);
