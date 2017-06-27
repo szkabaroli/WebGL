@@ -12,11 +12,20 @@ class BasicShader extends ShaderProgram{
     bindAttributes() {
         super.bindAttribute(0, 'positions');
         super.bindAttribute(1, 'textureCoords');
+        super.bindAttribute(2, 'normals');
     }
+
     getUniformLocations() {
         this.modelMatrixLoc = super.getUniformLocation('modelMatrix');
         this.projectionMatrixLoc = super.getUniformLocation('projectionMatrix');
         this.viewMatrixLoc = super.getUniformLocation('viewMatrix');
+        this.lightPositionLoc = super.getUniformLocation('lightPosition');
+        this.lightColorLoc = super.getUniformLocation('lightColor');
+    }
+
+    loadLight(light) {
+        super.loadVector(this.lightColorLoc, light.getColor());
+        super.loadVector(this.lightPositionLoc, light.getPosition());
     }
 
     loadModelMatrix(modelMatrix){

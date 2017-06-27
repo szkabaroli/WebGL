@@ -67,7 +67,7 @@ class OBJLoader {
                 }
             });
         }
-            return { i: fIndicies, v: fVertices, /*n: fNormals,*/ t: fTextures}
+            return { i: fIndicies, v: fVertices, n: fNormals, t: fTextures}
             
     }
 }

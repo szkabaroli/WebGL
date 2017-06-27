@@ -7,10 +7,11 @@ export default class Loader {
         this.gl = gl;
     }
 
-    loadToVAO(verticies, textCoords, indicies) {
+    loadToVAO(verticies, textCoords, normals, indicies) {
         var vaoID = this.createVAO();
         this.storeDataInAttributeList(0, 3, verticies);
         this.storeDataInAttributeList(1, 2, textCoords);
+        this.storeDataInAttributeList(2, 3, normals);
         this.bindIndiciesBuffer(indicies);
         this.unbindVAO();
         return new Model(vaoID, indicies.length);
@@ -25,7 +26,9 @@ export default class Loader {
             this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, image);
             this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);
             this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
-            this.gl.generateMipmap(this.gl.TEXTURE_2D, false);
+            this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.REPEAT);
+            this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.REPEAT);
+            this.gl.generateMipmap(this.gl.TEXTURE_2D, true);
             this.gl.bindTexture(this.gl.TEXTURE_2D, null);
         }
         return new Texture(textureId);

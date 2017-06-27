@@ -14,7 +14,7 @@ export default class Renderer {
     preRender() {
         this.gl.enable(this.gl.DEPTH_TEST);
         this.gl.enable(this.gl.CULL_FACE);
-        this.gl.clearColor(0, 0, 0, 255);
+        this.gl.clearColor(0.05, 0.1, 0.2, 255);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT);
         this.gl.clear(this.gl.DEPTH_BUFFER_BIT);
         this.gl.viewport(0,0,window.innerWidth, window.innerHeight);
@@ -28,9 +28,9 @@ export default class Renderer {
         this.gl.bindVertexArray(model.getModel().getVaoId());
         this.gl.enableVertexAttribArray(0);
         this.gl.enableVertexAttribArray(1);
+        this.gl.enableVertexAttribArray(2);
         
         var modelMatrix = Utils.createModelMatrix(entity.getPosition(), entity.getRotation(), entity.getScale());
-
         shader.loadModelMatrix(modelMatrix);
 
         this.gl.activeTexture(this.gl.TEXTURE0);
@@ -38,6 +38,7 @@ export default class Renderer {
         this.gl.drawElements(this.gl.TRIANGLES, model.getModel().getVertexCount(), this.gl.UNSIGNED_INT, 0);
         this.gl.disableVertexAttribArray(0);
         this.gl.disableVertexAttribArray(1);
+        this.gl.disableVertexAttribArray(2);
         this.gl.bindVertexArray(null);
     }
 }

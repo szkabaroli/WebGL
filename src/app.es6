@@ -9,6 +9,7 @@ import Entity from './render/entity';
 import { Vec3 } from './render/math';
 import Camera from './render/camera';
 import OBJLoader from './render/OBJLoader';
+import Light from './render/light';
 
 class main {
 
@@ -23,97 +24,17 @@ class main {
         const mBasicShader = new BasicShader(this.gl);
         const mRenderer = new Renderer(this.gl);
         
-
-        //rectangle verticies
-        var verticies = [
-            -1,1,-1,	
-            -1,-1,-1,	
-            1,-1,-1,	
-            1,1,-1,		
-            
-            -1,1,1,	
-            -1,-1,1,	
-            1,-1,1,	
-            1,1,1,
-            
-            1,1,-1,	
-            1,-1,-1,	
-            1,-1,1,	
-            1,1,1,
-            
-            -1,1,-1,	
-            -1,-1,-1,	
-            -1,-1,1,	
-            -1,1,1,
-            
-            -1,1,1,
-            -1,1,-1,
-            1,1,-1,
-            1,1,1,
-            
-            -1,-1,1,
-            -1,-1,-1,
-            1,-1,-1,
-            1,-1,1
-        ];
-        
-        var indicies = [
-            3,1,0,	
-            2,1,3,	
-
-            4,5,7,//
-            7,5,6,
-
-            11,9,8,
-            10,9,11,
-
-            12,13,15,
-            15,13,14,
-
-            19,17,16,
-            18,17,19,
-            
-            20,21,23,
-            23,21,22
-        ]
-
-        var textCoords = [
-            0,0,
-            0,1,
-            1,1,
-            1,0,			
-            0,0,
-            0,1,
-            1,1,
-            1,0,			
-            0,0,
-            0,1,
-            1,1,
-            1,0,
-            0,0,
-            0,1,
-            1,1,
-            1,0,
-            0,0,
-            0,1,
-            1,1,
-            1,0,
-            0,0,
-            0,1,
-            1,1,
-            1,0
-        ]
-        var model = OBJLoader.loadOBJModel('res/cube.obj', mLoader);
-        console.log({i : indicies, v : verticies, t : textCoords})
-        console.log(model)
+        var model = OBJLoader.loadOBJModel('res/test.obj', mLoader);
 
         setTimeout(()=> {
-            var Model = mLoader.loadToVAO(model.v, model.t, model.i);
-        var Texture = mLoader.loadTexture('res/white.jpg');
+            var Model = mLoader.loadToVAO(model.v, model.t, model.n, model.i);
+        var Texture = mLoader.loadTexture('res/ts.png');
         var Cube = new TexturedModel(Model, Texture);
         var mCamera = new Camera();
 
-        var mEntity = new Entity(Cube, new Vec3(0,0,0), new Vec3(0,0,0), 0.2);
+        var mEntity = new Entity(Cube, new Vec3(2,0,-1), new Vec3(0,0,0), 0.2);
+        var mEntity2 = new Entity(Cube, new Vec3(-1,0,-2), new Vec3(0,0,0), 0.2);
+        var mLight = new Light(new Vec3(-1,-0.1,-1), new Vec3(2,2,1));
         
         var code = 0;
 
@@ -142,12 +63,14 @@ class main {
         mDisplayManager.updateDisplay(() => {
             mDisplayManager.resize();
             mEntity.increasePosition(new Vec3(0,0,0))
-            mEntity.increaseRotation(new Vec3(0,0,0));
+            mEntity.increaseRotation(new Vec3(1,1,0));
             mCamera.move(code);
             mRenderer.preRender();
             mBasicShader.start();
+            mBasicShader.loadLight(mLight);
             mBasicShader.loadViewMatrix(mCamera);
             mRenderer.render(mEntity, mBasicShader);
+            mRenderer.render(mEntity2, mBasicShader);
             mBasicShader.stop();
         })
         
