@@ -15,8 +15,6 @@ class ShaderProgram{
         this.getUniformLocations();
     }
 
-    
-
     start() {
         this.gl.useProgram(this.programId)
     }

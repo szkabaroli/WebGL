@@ -177,6 +177,38 @@ export class Mat4 {
             this.m15,
         ]);
     }
+
+    multiply(matrix) {
+        let a00 = matrix.m00, a01 = matrix.m01, a02 = matrix.m02, a03 = matrix.m03,
+            a10 = matrix.m04, a11 = matrix.m05, a12 = matrix.m06, a13 = matrix.m07,
+            a20 = matrix.m08, a21 = matrix.m09, a22 = matrix.m10, a23 = matrix.m11,
+            a30 = matrix.m12, a31 = matrix.m13, a32 = matrix.m14, a33 = matrix.m15;
+
+        // Cache only the current line of the second matrix
+        let b0 = this.m00, b1 = this.m01, b2 = this.m02, b3 = this.m03;
+        this.m00 = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
+        this.m01 = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
+        this.m02 = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
+        this.m03 = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
+
+        b0 = this.m04; b1 = this.m05; b2 = this.m06; b3 = this.m07;
+        this.m04 = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
+        this.m05 = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
+        this.m06 = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
+        this.m07 = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
+
+        b0 = this.m08; b1 = this.m09; b2 = this.m10; b3 = this.m11;
+        this.m08 = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
+        this.m09 = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
+        this.m10 = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
+        this.m11 = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
+
+        b0 = this.m12; b1 = this.m13; b2 = this.m14; b3 = this.m15;
+        this.m12 = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
+        this.m13 = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
+        this.m14 = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
+        this.m15 = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
+    }
 }
 
 export class Utils {
@@ -213,6 +245,7 @@ export class Utils {
     }
 
     static createViewMatrix(camera) {
+        console.log(camera)
         var matrix = new Mat4();
         matrix.identity();
         matrix.rotateX(this.toRad(camera.getRotation().x));

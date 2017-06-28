@@ -9,9 +9,17 @@
             padding: 0;
             margin: 0;
         }
+        #counter {
+            position: absolute;
+            z-index: 10;
+        }
+        #canvas {
+            position: absolute;
+        }
     </style>
 </head>
 <body>
+    <h3 id="counter">0.00</h3>
     <canvas antialias="true" id="gl"></canvas>
     <script src="dist/bundle.js"></script>
 </body>

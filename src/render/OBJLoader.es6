@@ -2,7 +2,8 @@ import Loader from './loader';
 import {Vec3, Vec2} from './math';
 
 class OBJLoader {
-    static loadOBJModel(fileName, loader) {
+
+    static loadOBJModel(fileName) {
         let cVertices = [];
         let cTextures = [];
         let cNormals = [];
@@ -67,8 +68,7 @@ class OBJLoader {
                 }
             });
         }
-            return { i: fIndicies, v: fVertices, n: fNormals, t: fTextures}
-            
+        return {v: fVertices, t: fTextures, n: fNormals, i: fIndicies};    
     }
 }
 

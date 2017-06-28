@@ -1,4 +1,4 @@
-import ShaderProgram from './shaderprogram';
+import ShaderProgram from './shaderProgram';
 import { vertexShader, fragmentShader } from '../shaders/basicShader';
 import { Mat4, Utils} from './math';
 import Camera from './camera';
@@ -21,6 +21,7 @@ class BasicShader extends ShaderProgram{
         this.viewMatrixLoc = super.getUniformLocation('viewMatrix');
         this.lightPositionLoc = super.getUniformLocation('lightPosition');
         this.lightColorLoc = super.getUniformLocation('lightColor');
+        this.fogColorLoc = super.getUniformLocation('fogColor');
     }
 
     loadLight(light) {
@@ -28,11 +29,17 @@ class BasicShader extends ShaderProgram{
         super.loadVector(this.lightPositionLoc, light.getPosition());
     }
 
-    loadModelMatrix(modelMatrix){
+    loadFogColor(color) {
+        super.loadVector(this.fogColorLoc, color);
+    }
+
+    loadModelMatrix(entity){
+        const modelMatrix = Utils.createModelMatrix(entity.getPosition(), entity.getRotation(), entity.getScale());
         super.loadMatrix(this.modelMatrixLoc, modelMatrix);
     }
 
-    loadProjectionMatrix(projectionMatrix) {
+    loadProjectionMatrix(FOV, NEAR_PLANE, FAR_PLANE) {
+        const projectionMatrix = Utils.createProjectionMatrix(FOV, NEAR_PLANE, FAR_PLANE);
         super.loadMatrix(this.projectionMatrixLoc, projectionMatrix);
     }
     loadViewMatrix(camera) {

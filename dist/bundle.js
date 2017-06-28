@@ -47,6 +47,10 @@ var _light = require('./render/light');
 
 var _light2 = _interopRequireDefault(_light);
 
+var _masterRenderer = require('./render/masterRenderer');
+
+var _masterRenderer2 = _interopRequireDefault(_masterRenderer);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -60,22 +64,19 @@ var main = function main() {
 
     //create loader and renderer
     var mLoader = new _loader2.default(this.gl);
-    var mBasicShader = new _basicshader2.default(this.gl);
-    var mRenderer = new _renderer2.default(this.gl);
+    var mRenderer = new _masterRenderer2.default(this.gl);
 
-    var model = _OBJLoader2.default.loadOBJModel('res/test.obj', mLoader);
+    var model = _OBJLoader2.default.loadOBJModel('res/cube.obj');
 
     setTimeout(function () {
         var Model = mLoader.loadToVAO(model.v, model.t, model.n, model.i);
         var Texture = mLoader.loadTexture('res/grid.png');
         var Cube = new _texturedModel2.default(Model, Texture);
         var mCamera = new _camera2.default(new _math.Vec3(0, 0, 0), new _math.Vec3(0, 0, 0));
-
-        var mEntity = new _entity2.default(Cube, new _math.Vec3(0, 0, -1), new _math.Vec3(0, 0, 0), 0.2);
-        var mLight = new _light2.default(new _math.Vec3(-1, 10, -1), new _math.Vec3(1, 0.92, 0.78));
+        var mEntity = new _entity2.default(Cube, new _math.Vec3(0, 0, -2), new _math.Vec3(0, 0, 0), 1);
+        var mLight = new _light2.default(new _math.Vec3(-1000, 1000, 1000), new _math.Vec3(1, 0.92, 0.78));
 
         var code = 0;
-
         document.onkeydown = function (e) {
             if (e.keyCode == 87) {
                 code = 87;
@@ -91,32 +92,42 @@ var main = function main() {
                 code = 81;
             } else if (e.keyCode == 69) {
                 code = 69;
+            } else if (e.keyCode == 39) {
+                code = 39;
+            } else if (e.keyCode == 37) {
+                code = 37;
             }
         };
         document.onkeyup = function () {
             code = 0;
         };
 
+        var fpsCounter = document.getElementById('counter');
+        var lastLoop = new Date();
+
         mDisplayManager.updateDisplay(function () {
-            mDisplayManager.resize();
-            mEntity.increasePosition(new _math.Vec3(0, 0, 0));
-            mEntity.increaseRotation(new _math.Vec3(0, 1, 0));
+            var thisLoop = new Date();
             mCamera.move(code);
-            mRenderer.preRender();
-            mBasicShader.start();
-            mBasicShader.loadLight(mLight);
-            mBasicShader.loadViewMatrix(mCamera);
-            mRenderer.render(mEntity, mBasicShader);
-            mBasicShader.stop();
+            mDisplayManager.resize();
+
+            //mEntity.increasePosition(new Vec3(0,0,0))
+            mEntity.increaseRotation(new _math.Vec3(0, 1, 0));
+
+            mRenderer.processEntity(mEntity);
+            mRenderer.render(mLight, mCamera);
+
+            var fps = 1000 / (thisLoop - lastLoop);
+            fpsCounter.innerHTML = Math.round(fps);
+
+            lastLoop = thisLoop;
         });
     }, 1000);
-
     //mLoader.cleanUp();
 };
 
 new main();
 
-},{"./render/OBJLoader":2,"./render/basicshader":3,"./render/camera":4,"./render/context":5,"./render/entity":6,"./render/light":7,"./render/loader":8,"./render/math":9,"./render/model":10,"./render/renderer":11,"./render/texture":13,"./render/texturedModel":14}],2:[function(require,module,exports){
+},{"./render/OBJLoader":2,"./render/basicshader":4,"./render/camera":5,"./render/context":6,"./render/entity":7,"./render/light":8,"./render/loader":9,"./render/masterRenderer":10,"./render/math":11,"./render/model":12,"./render/renderer":13,"./render/texture":15,"./render/texturedModel":16}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -142,7 +153,7 @@ var OBJLoader = function () {
 
     _createClass(OBJLoader, null, [{
         key: 'loadOBJModel',
-        value: function loadOBJModel(fileName, loader) {
+        value: function loadOBJModel(fileName) {
             var cVertices = [];
             var cTextures = [];
             var cNormals = [];
@@ -205,7 +216,7 @@ var OBJLoader = function () {
                     }
                 });
             }
-            return { i: fIndicies, v: fVertices, n: fNormals, t: fTextures };
+            return { v: fVertices, t: fTextures, n: fNormals, i: fIndicies };
         }
     }]);
 
@@ -214,7 +225,7 @@ var OBJLoader = function () {
 
 exports.default = OBJLoader;
 
-},{"./loader":8,"./math":9}],3:[function(require,module,exports){
+},{"./loader":9,"./math":11}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -225,9 +236,9 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-var _shaderprogram = require('./shaderprogram');
+var _shaderProgram = require('./shaderProgram');
 
-var _shaderprogram2 = _interopRequireDefault(_shaderprogram);
+var _shaderProgram2 = _interopRequireDefault(_shaderProgram);
 
 var _basicShader = require('../shaders/basicShader');
 
@@ -269,6 +280,7 @@ var BasicShader = function (_ShaderProgram) {
             this.viewMatrixLoc = _get(BasicShader.prototype.__proto__ || Object.getPrototypeOf(BasicShader.prototype), 'getUniformLocation', this).call(this, 'viewMatrix');
             this.lightPositionLoc = _get(BasicShader.prototype.__proto__ || Object.getPrototypeOf(BasicShader.prototype), 'getUniformLocation', this).call(this, 'lightPosition');
             this.lightColorLoc = _get(BasicShader.prototype.__proto__ || Object.getPrototypeOf(BasicShader.prototype), 'getUniformLocation', this).call(this, 'lightColor');
+            this.fogColorLoc = _get(BasicShader.prototype.__proto__ || Object.getPrototypeOf(BasicShader.prototype), 'getUniformLocation', this).call(this, 'fogColor');
         }
     }, {
         key: 'loadLight',
@@ -277,13 +289,20 @@ var BasicShader = function (_ShaderProgram) {
             _get(BasicShader.prototype.__proto__ || Object.getPrototypeOf(BasicShader.prototype), 'loadVector', this).call(this, this.lightPositionLoc, light.getPosition());
         }
     }, {
+        key: 'loadFogColor',
+        value: function loadFogColor(color) {
+            _get(BasicShader.prototype.__proto__ || Object.getPrototypeOf(BasicShader.prototype), 'loadVector', this).call(this, this.fogColorLoc, color);
+        }
+    }, {
         key: 'loadModelMatrix',
-        value: function loadModelMatrix(modelMatrix) {
+        value: function loadModelMatrix(entity) {
+            var modelMatrix = _math.Utils.createModelMatrix(entity.getPosition(), entity.getRotation(), entity.getScale());
             _get(BasicShader.prototype.__proto__ || Object.getPrototypeOf(BasicShader.prototype), 'loadMatrix', this).call(this, this.modelMatrixLoc, modelMatrix);
         }
     }, {
         key: 'loadProjectionMatrix',
-        value: function loadProjectionMatrix(projectionMatrix) {
+        value: function loadProjectionMatrix(FOV, NEAR_PLANE, FAR_PLANE) {
+            var projectionMatrix = _math.Utils.createProjectionMatrix(FOV, NEAR_PLANE, FAR_PLANE);
             _get(BasicShader.prototype.__proto__ || Object.getPrototypeOf(BasicShader.prototype), 'loadMatrix', this).call(this, this.projectionMatrixLoc, projectionMatrix);
         }
     }, {
@@ -295,11 +314,104 @@ var BasicShader = function (_ShaderProgram) {
     }]);
 
     return BasicShader;
-}(_shaderprogram2.default);
+}(_shaderProgram2.default);
 
 exports.default = BasicShader;
 
-},{"../shaders/basicShader":15,"./camera":4,"./math":9,"./shaderprogram":12}],4:[function(require,module,exports){
+},{"../shaders/basicShader":17,"./camera":5,"./math":11,"./shaderProgram":14}],4:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _shaderProgram = require('./shaderProgram');
+
+var _shaderProgram2 = _interopRequireDefault(_shaderProgram);
+
+var _basicShader = require('../shaders/basicShader');
+
+var _math = require('./math');
+
+var _camera = require('./camera');
+
+var _camera2 = _interopRequireDefault(_camera);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var BasicShader = function (_ShaderProgram) {
+    _inherits(BasicShader, _ShaderProgram);
+
+    function BasicShader(gl) {
+        _classCallCheck(this, BasicShader);
+
+        return _possibleConstructorReturn(this, (BasicShader.__proto__ || Object.getPrototypeOf(BasicShader)).call(this, gl, _basicShader.vertexShader, _basicShader.fragmentShader));
+    }
+
+    _createClass(BasicShader, [{
+        key: 'bindAttributes',
+        value: function bindAttributes() {
+            _get(BasicShader.prototype.__proto__ || Object.getPrototypeOf(BasicShader.prototype), 'bindAttribute', this).call(this, 0, 'positions');
+            _get(BasicShader.prototype.__proto__ || Object.getPrototypeOf(BasicShader.prototype), 'bindAttribute', this).call(this, 1, 'textureCoords');
+            _get(BasicShader.prototype.__proto__ || Object.getPrototypeOf(BasicShader.prototype), 'bindAttribute', this).call(this, 2, 'normals');
+        }
+    }, {
+        key: 'getUniformLocations',
+        value: function getUniformLocations() {
+            this.modelMatrixLoc = _get(BasicShader.prototype.__proto__ || Object.getPrototypeOf(BasicShader.prototype), 'getUniformLocation', this).call(this, 'modelMatrix');
+            this.projectionMatrixLoc = _get(BasicShader.prototype.__proto__ || Object.getPrototypeOf(BasicShader.prototype), 'getUniformLocation', this).call(this, 'projectionMatrix');
+            this.viewMatrixLoc = _get(BasicShader.prototype.__proto__ || Object.getPrototypeOf(BasicShader.prototype), 'getUniformLocation', this).call(this, 'viewMatrix');
+            this.lightPositionLoc = _get(BasicShader.prototype.__proto__ || Object.getPrototypeOf(BasicShader.prototype), 'getUniformLocation', this).call(this, 'lightPosition');
+            this.lightColorLoc = _get(BasicShader.prototype.__proto__ || Object.getPrototypeOf(BasicShader.prototype), 'getUniformLocation', this).call(this, 'lightColor');
+            this.fogColorLoc = _get(BasicShader.prototype.__proto__ || Object.getPrototypeOf(BasicShader.prototype), 'getUniformLocation', this).call(this, 'fogColor');
+        }
+    }, {
+        key: 'loadLight',
+        value: function loadLight(light) {
+            _get(BasicShader.prototype.__proto__ || Object.getPrototypeOf(BasicShader.prototype), 'loadVector', this).call(this, this.lightColorLoc, light.getColor());
+            _get(BasicShader.prototype.__proto__ || Object.getPrototypeOf(BasicShader.prototype), 'loadVector', this).call(this, this.lightPositionLoc, light.getPosition());
+        }
+    }, {
+        key: 'loadFogColor',
+        value: function loadFogColor(color) {
+            _get(BasicShader.prototype.__proto__ || Object.getPrototypeOf(BasicShader.prototype), 'loadVector', this).call(this, this.fogColorLoc, color);
+        }
+    }, {
+        key: 'loadModelMatrix',
+        value: function loadModelMatrix(entity) {
+            var modelMatrix = _math.Utils.createModelMatrix(entity.getPosition(), entity.getRotation(), entity.getScale());
+            _get(BasicShader.prototype.__proto__ || Object.getPrototypeOf(BasicShader.prototype), 'loadMatrix', this).call(this, this.modelMatrixLoc, modelMatrix);
+        }
+    }, {
+        key: 'loadProjectionMatrix',
+        value: function loadProjectionMatrix(FOV, NEAR_PLANE, FAR_PLANE) {
+            var projectionMatrix = _math.Utils.createProjectionMatrix(FOV, NEAR_PLANE, FAR_PLANE);
+            _get(BasicShader.prototype.__proto__ || Object.getPrototypeOf(BasicShader.prototype), 'loadMatrix', this).call(this, this.projectionMatrixLoc, projectionMatrix);
+        }
+    }, {
+        key: 'loadViewMatrix',
+        value: function loadViewMatrix(camera) {
+            var viewMatrix = _math.Utils.createViewMatrix(camera);
+            _get(BasicShader.prototype.__proto__ || Object.getPrototypeOf(BasicShader.prototype), 'loadMatrix', this).call(this, this.viewMatrixLoc, viewMatrix);
+        }
+    }]);
+
+    return BasicShader;
+}(_shaderProgram2.default);
+
+exports.default = BasicShader;
+
+},{"../shaders/basicShader":17,"./camera":5,"./math":11,"./shaderProgram":14}],5:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -318,28 +430,30 @@ var Camera = function () {
 
         this.position = position;
         this.rotation = rotation;
+        this.SPEED = 10;
     }
 
     _createClass(Camera, [{
         key: 'move',
         value: function move(code) {
             if (code == 87) {
-                this.position.z -= 0.02;
+                this.position.z -= 0.01 * this.SPEED;
             }
             if (code == 83) {
-                this.position.z += 0.02;
+                this.position.z += 0.01 * this.SPEED;
             }
             if (code == 68) {
-                this.position.x += 0.02;
+                this.position.x += 0.01 * this.SPEED;
             }
             if (code == 65) {
-                this.position.x -= 0.02;
+                this.position.x -= 0.01 * this.SPEED;
             }
             if (code == 69) {
-                this.position.y += 0.02;
+                this.position.y += 0.01 * this.SPEED;
             }
             if (code == 81) {
-                this.position.y -= 0.02;
+                console.log('fdfsd');
+                this.position.y -= 0.01 * this.SPEED;
             }
         }
     }, {
@@ -359,7 +473,7 @@ var Camera = function () {
 
 exports.default = Camera;
 
-},{"./math":9}],5:[function(require,module,exports){
+},{"./math":11}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -420,7 +534,7 @@ var DisplayManager = function () {
 
 exports.default = DisplayManager;
 
-},{"../shaders/basicShader":15}],6:[function(require,module,exports){
+},{"../shaders/basicShader":17}],7:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -490,7 +604,7 @@ var Entity = function () {
 
 exports.default = Entity;
 
-},{"./math":9,"./texturedModel":14}],7:[function(require,module,exports){
+},{"./math":11,"./texturedModel":16}],8:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -526,7 +640,7 @@ var Light = function () {
 
 exports.default = Light;
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -620,7 +734,72 @@ var Loader = function () {
 
 exports.default = Loader;
 
-},{"./model":10,"./texture":13}],9:[function(require,module,exports){
+},{"./model":12,"./texture":15}],10:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _basicShader = require('./basicShader');
+
+var _basicShader2 = _interopRequireDefault(_basicShader);
+
+var _renderer = require('./renderer');
+
+var _renderer2 = _interopRequireDefault(_renderer);
+
+var _math = require('./math');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var MasterRenderer = function () {
+    function MasterRenderer(gl) {
+        _classCallCheck(this, MasterRenderer);
+
+        this.shader = new _basicShader2.default(gl);
+        this.renderer = new _renderer2.default(gl, this.shader);
+        this.entities = new Map();
+    }
+
+    _createClass(MasterRenderer, [{
+        key: 'processEntity',
+        value: function processEntity(entity) {
+            var model = entity.getTexturedModel();
+            if (this.entities.has(model)) {
+                var entities = this.entities.get(model).push(entity);
+            } else {
+                var entities = [entity];
+                this.entities.set(model, entities);
+            }
+        }
+    }, {
+        key: 'render',
+        value: function render(light, camera) {
+            this.renderer.preRender();
+            this.shader.start();
+
+            this.shader.loadViewMatrix(camera);
+            this.shader.loadProjectionMatrix(90, 0.001, 1000);
+            this.shader.loadLight(light);
+            this.shader.loadFogColor(new _math.Vec3(0.74, 0.96, 0.87));
+
+            this.renderer.render(this.entities);
+            this.shader.stop();
+            this.entities.clear();
+        }
+    }]);
+
+    return MasterRenderer;
+}();
+
+exports.default = MasterRenderer;
+
+},{"./basicShader":3,"./math":11,"./renderer":13}],11:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -831,6 +1010,54 @@ var Mat4 = exports.Mat4 = function () {
         value: function toArray() {
             return new Float32Array([this.m00, this.m01, this.m02, this.m03, this.m04, this.m05, this.m06, this.m07, this.m08, this.m09, this.m10, this.m11, this.m12, this.m13, this.m14, this.m15]);
         }
+    }, {
+        key: 'multiply',
+        value: function multiply(matrix) {
+            var a00 = matrix.m00,
+                a01 = matrix.m01,
+                a02 = matrix.m02,
+                a03 = matrix.m03,
+                a10 = matrix.m04,
+                a11 = matrix.m05,
+                a12 = matrix.m06,
+                a13 = matrix.m07,
+                a20 = matrix.m08,
+                a21 = matrix.m09,
+                a22 = matrix.m10,
+                a23 = matrix.m11,
+                a30 = matrix.m12,
+                a31 = matrix.m13,
+                a32 = matrix.m14,
+                a33 = matrix.m15;
+
+            // Cache only the current line of the second matrix
+            var b0 = this.m00,
+                b1 = this.m01,
+                b2 = this.m02,
+                b3 = this.m03;
+            this.m00 = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
+            this.m01 = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
+            this.m02 = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
+            this.m03 = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
+
+            b0 = this.m04;b1 = this.m05;b2 = this.m06;b3 = this.m07;
+            this.m04 = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
+            this.m05 = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
+            this.m06 = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
+            this.m07 = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
+
+            b0 = this.m08;b1 = this.m09;b2 = this.m10;b3 = this.m11;
+            this.m08 = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
+            this.m09 = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
+            this.m10 = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
+            this.m11 = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
+
+            b0 = this.m12;b1 = this.m13;b2 = this.m14;b3 = this.m15;
+            this.m12 = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
+            this.m13 = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
+            this.m14 = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
+            this.m15 = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
+        }
     }]);
 
     return Mat4;
@@ -878,6 +1105,7 @@ var Utils = exports.Utils = function () {
     }, {
         key: 'createViewMatrix',
         value: function createViewMatrix(camera) {
+            console.log(camera);
             var matrix = new Mat4();
             matrix.identity();
             matrix.rotateX(this.toRad(camera.getRotation().x));
@@ -892,7 +1120,7 @@ var Utils = exports.Utils = function () {
     return Utils;
 }();
 
-},{"./camera":4}],10:[function(require,module,exports){
+},{"./camera":5}],12:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -928,7 +1156,7 @@ var Model = function () {
 
 exports.default = Model;
 
-},{}],11:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -959,6 +1187,7 @@ var Renderer = function () {
     function Renderer(gl, shader) {
         _classCallCheck(this, Renderer);
 
+        this.shader = shader;
         this.gl = gl;
     }
 
@@ -974,26 +1203,41 @@ var Renderer = function () {
         }
     }, {
         key: 'render',
-        value: function render(entity, shader) {
+        value: function render(entitiesMap) {
+            var _this = this;
 
-            var matrix = _math.Utils.createProjectionMatrix(90, 0.001, 1000);
-            shader.loadProjectionMatrix(matrix);
-            var model = entity.getTexturedModel();
+            entitiesMap.forEach(function (entities, model) {
+                _this.prepareTexturedModel(model);
+                entities.forEach(function (entity) {
+                    _this.perEntity(entity);
+                    _this.gl.drawElements(_this.gl.TRIANGLES, model.getModel().getVertexCount(), _this.gl.UNSIGNED_INT, 0);
+                });
+                _this.unbindTexturedModel();
+            });
+        }
+    }, {
+        key: 'prepareTexturedModel',
+        value: function prepareTexturedModel(model) {
             this.gl.bindVertexArray(model.getModel().getVaoId());
             this.gl.enableVertexAttribArray(0);
             this.gl.enableVertexAttribArray(1);
             this.gl.enableVertexAttribArray(2);
 
-            var modelMatrix = _math.Utils.createModelMatrix(entity.getPosition(), entity.getRotation(), entity.getScale());
-            shader.loadModelMatrix(modelMatrix);
-
             this.gl.activeTexture(this.gl.TEXTURE0);
             this.gl.bindTexture(this.gl.TEXTURE_2D, model.getTexture().getTextureId());
-            this.gl.drawElements(this.gl.TRIANGLES, model.getModel().getVertexCount(), this.gl.UNSIGNED_INT, 0);
+        }
+    }, {
+        key: 'unbindTexturedModel',
+        value: function unbindTexturedModel() {
             this.gl.disableVertexAttribArray(0);
             this.gl.disableVertexAttribArray(1);
             this.gl.disableVertexAttribArray(2);
             this.gl.bindVertexArray(null);
+        }
+    }, {
+        key: 'perEntity',
+        value: function perEntity(entity) {
+            this.shader.loadModelMatrix(entity);
         }
     }]);
 
@@ -1002,7 +1246,7 @@ var Renderer = function () {
 
 exports.default = Renderer;
 
-},{"./basicshader":3,"./entity":6,"./math":9,"./texturedModel":14}],12:[function(require,module,exports){
+},{"./basicshader":4,"./entity":7,"./math":11,"./texturedModel":16}],14:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1102,7 +1346,7 @@ var ShaderProgram = function () {
 
 exports.default = ShaderProgram;
 
-},{"../shaders/basicShader":15,"./math":9}],13:[function(require,module,exports){
+},{"../shaders/basicShader":17,"./math":11}],15:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1132,7 +1376,7 @@ var Texture = function () {
 
 exports.default = Texture;
 
-},{}],14:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1178,14 +1422,14 @@ var TexturedModel = function () {
 
 exports.default = TexturedModel;
 
-},{"./model":10,"./texture":13}],15:[function(require,module,exports){
+},{"./model":12,"./texture":15}],17:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-var vertexShader = exports.vertexShader = "#version 300 es\n\nprecision highp float;\n\nin vec3 position;\nin vec2 textureCoords;\nin vec3 normals;\n\nuniform mat4 modelMatrix;\nuniform mat4 projectionMatrix;\nuniform mat4 viewMatrix;\nuniform vec3 lightPosition;\nuniform vec3 lightColor;\n\nout vec2 passedTextureCoords;\nout vec3 surfaceNormal;\nout vec3 toLightVector;\n\nvoid main(){\n    vec4 worldPosition = modelMatrix * vec4(position, 1.0f);\n    gl_Position = projectionMatrix * viewMatrix * worldPosition;\n    passedTextureCoords = textureCoords;\n\n    surfaceNormal = (modelMatrix * vec4(normals, 0.0f)).xyz;\n    toLightVector = lightPosition - worldPosition.xyz;\n} \n";
+var vertexShader = exports.vertexShader = "#version 300 es\n\nprecision mediump float;\n\nin vec3 position;\nin vec2 textureCoords;\nin vec3 normals;\n\n\nuniform mat4 modelMatrix;\nuniform mat4 projectionMatrix;\nuniform mat4 viewMatrix;\nuniform vec3 lightPosition;\n\nout vec2 passedTextureCoords;\nout vec3 surfaceNormal;\nout vec3 toLightVector;\nout float visiblity;\n\nconst float density = 0.05;\nconst float gradient =5.0;\n\n\nvoid main(){\n    vec4 worldPosition = modelMatrix * vec4(position, 1.0);\n    vec4 positionRelativeToCam = viewMatrix * worldPosition;\n    gl_Position = projectionMatrix * positionRelativeToCam;\n    passedTextureCoords = textureCoords;\n\n    surfaceNormal = (modelMatrix * vec4(normals, 0.0)).xyz;\n    toLightVector = lightPosition - worldPosition.xyz;\n\n    float distance = length(positionRelativeToCam.xyz);\n    visiblity = exp(-pow((distance*density), gradient));\n    visiblity = clamp(visiblity, 0.0f, 1.0);\n} \n";
 
-var fragmentShader = exports.fragmentShader = "#version 300 es\n\nprecision highp float;\n\nin vec2 passedTextureCoords;\nin vec3 surfaceNormal;\nin vec3 toLightVector;\n\nuniform sampler2D textureSampler;\nuniform vec3 lightColor;\n\nout vec4 out_Color;\n\nvoid main() {\n    vec3 unitNormal = normalize(surfaceNormal);\n    vec3 unitLightVector = normalize(toLightVector);\n    float nDotl = dot(unitNormal, unitLightVector);\n    float brightness = max(nDotl, 0.2);\n    vec3 diffuse = brightness * lightColor;\n    out_Color = vec4(diffuse, 1.0) * texture(textureSampler, passedTextureCoords);\n}";
+var fragmentShader = exports.fragmentShader = "#version 300 es\n\nprecision mediump float;\n\nin vec2 passedTextureCoords;\nin vec3 surfaceNormal;\nin vec3 toLightVector;\nin float visiblity;\n\nuniform sampler2D textureSampler;\nuniform vec3 lightColor;\nuniform vec3 fogColor;\n\nout vec4 out_Color;\n\nvoid main() {\n    vec3 unitNormal = normalize(surfaceNormal);\n    vec3 unitLightVector = normalize(toLightVector);\n    float nDotl = dot(unitNormal, unitLightVector);\n    float brightness = max(nDotl, 0.2);\n    vec3 diffuse = brightness * lightColor;\n    out_Color = vec4(diffuse, 1.0) * texture(textureSampler, passedTextureCoords);\n    out_Color = mix(vec4(fogColor, 1.0), out_Color, visiblity);\n}";
 
 },{}]},{},[1]);

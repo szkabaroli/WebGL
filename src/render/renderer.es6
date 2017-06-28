@@ -8,6 +8,7 @@ export default class Renderer {
     
 
     constructor(gl, shader) {
+        this.shader = shader;
         this.gl = gl;
     }
 
@@ -20,25 +21,35 @@ export default class Renderer {
         this.gl.viewport(0,0,window.innerWidth, window.innerHeight);
     }
 
-    render(entity, shader) {
-        
-        const matrix = Utils.createProjectionMatrix(90, 0.001, 1000);
-        shader.loadProjectionMatrix(matrix);
-        var model = entity.getTexturedModel();
+    render(entitiesMap) {
+        entitiesMap.forEach((entities, model)=>{
+            this.prepareTexturedModel(model);
+            entities.forEach((entity)=>{
+                this.perEntity(entity);
+                this.gl.drawElements(this.gl.TRIANGLES, model.getModel().getVertexCount(), this.gl.UNSIGNED_INT, 0);
+            });
+            this.unbindTexturedModel();
+        });
+    }
+
+    prepareTexturedModel(model) {
         this.gl.bindVertexArray(model.getModel().getVaoId());
         this.gl.enableVertexAttribArray(0);
         this.gl.enableVertexAttribArray(1);
         this.gl.enableVertexAttribArray(2);
-        
-        var modelMatrix = Utils.createModelMatrix(entity.getPosition(), entity.getRotation(), entity.getScale());
-        shader.loadModelMatrix(modelMatrix);
 
         this.gl.activeTexture(this.gl.TEXTURE0);
         this.gl.bindTexture(this.gl.TEXTURE_2D, model.getTexture().getTextureId());
-        this.gl.drawElements(this.gl.TRIANGLES, model.getModel().getVertexCount(), this.gl.UNSIGNED_INT, 0);
+    }
+
+    unbindTexturedModel() {
         this.gl.disableVertexAttribArray(0);
         this.gl.disableVertexAttribArray(1);
         this.gl.disableVertexAttribArray(2);
         this.gl.bindVertexArray(null);
+    }
+
+    perEntity(entity) {
+        this.shader.loadModelMatrix(entity);
     }
 }
