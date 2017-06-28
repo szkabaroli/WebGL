@@ -22,7 +22,7 @@ void main(){
     gl_Position = projectionMatrix * viewMatrix * worldPosition;
     passedTextureCoords = textureCoords;
 
-    surfaceNormal = (modelMatrix * vec4(normals, 0.0)).xyz;
+    surfaceNormal = (modelMatrix * vec4(normals, 0.0f)).xyz;
     toLightVector = lightPosition - worldPosition.xyz;
 } 
 `;
@@ -45,7 +45,7 @@ void main() {
     vec3 unitNormal = normalize(surfaceNormal);
     vec3 unitLightVector = normalize(toLightVector);
     float nDotl = dot(unitNormal, unitLightVector);
-    float brightness = max(nDotl, 0.1);
+    float brightness = max(nDotl, 0.2);
     vec3 diffuse = brightness * lightColor;
     out_Color = vec4(diffuse, 1.0) * texture(textureSampler, passedTextureCoords);
 }`;

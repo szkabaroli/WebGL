@@ -24,17 +24,16 @@ class main {
         const mBasicShader = new BasicShader(this.gl);
         const mRenderer = new Renderer(this.gl);
         
-        var model = OBJLoader.loadOBJModel('res/cube.obj', mLoader);
+        var model = OBJLoader.loadOBJModel('res/test.obj', mLoader);
 
         setTimeout(()=> {
             var Model = mLoader.loadToVAO(model.v, model.t, model.n, model.i);
         var Texture = mLoader.loadTexture('res/grid.png');
         var Cube = new TexturedModel(Model, Texture);
-        var mCamera = new Camera(new Vec3(0,2,0), new Vec3(45,0,0));
+        var mCamera = new Camera(new Vec3(0,0,0), new Vec3(0,0,0));
 
-        var mEntity = new Entity(Cube, new Vec3(0,1,0), new Vec3(0,0,0),0.2);
-        var mEntity2 = new Entity(Cube, new Vec3(20,-40,0), new Vec3(0,0,0), 20);
-        var mLight = new Light(new Vec3(-1,10,-1), new Vec3(1,1,1));
+        var mEntity = new Entity(Cube, new Vec3(0,0,-1), new Vec3(0,0,0),0.2);
+        var mLight = new Light(new Vec3(-1,10,-1), new Vec3(1,0.92,0.78));
         
         var code = 0;
 
@@ -70,7 +69,6 @@ class main {
             mBasicShader.loadLight(mLight);
             mBasicShader.loadViewMatrix(mCamera);
             mRenderer.render(mEntity, mBasicShader);
-            mRenderer.render(mEntity2, mBasicShader);
             mBasicShader.stop();
         })
         

@@ -14,7 +14,7 @@ export default class Renderer {
     preRender() {
         this.gl.enable(this.gl.DEPTH_TEST);
         this.gl.enable(this.gl.CULL_FACE);
-        this.gl.clearColor(0.05, 0.1, 0.2, 255);
+        this.gl.clearColor(0.59, 0.84, 0.85, 255);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT);
         this.gl.clear(this.gl.DEPTH_BUFFER_BIT);
         this.gl.viewport(0,0,window.innerWidth, window.innerHeight);

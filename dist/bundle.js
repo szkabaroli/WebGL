@@ -63,17 +63,16 @@ var main = function main() {
     var mBasicShader = new _basicshader2.default(this.gl);
     var mRenderer = new _renderer2.default(this.gl);
 
-    var model = _OBJLoader2.default.loadOBJModel('res/cube.obj', mLoader);
+    var model = _OBJLoader2.default.loadOBJModel('res/test.obj', mLoader);
 
     setTimeout(function () {
         var Model = mLoader.loadToVAO(model.v, model.t, model.n, model.i);
         var Texture = mLoader.loadTexture('res/grid.png');
         var Cube = new _texturedModel2.default(Model, Texture);
-        var mCamera = new _camera2.default(new _math.Vec3(0, 2, 0), new _math.Vec3(45, 0, 0));
+        var mCamera = new _camera2.default(new _math.Vec3(0, 0, 0), new _math.Vec3(0, 0, 0));
 
-        var mEntity = new _entity2.default(Cube, new _math.Vec3(0, 1, 0), new _math.Vec3(0, 0, 0), 0.2);
-        var mEntity2 = new _entity2.default(Cube, new _math.Vec3(20, -40, 0), new _math.Vec3(0, 0, 0), 20);
-        var mLight = new _light2.default(new _math.Vec3(-1, 10, -1), new _math.Vec3(1, 1, 1));
+        var mEntity = new _entity2.default(Cube, new _math.Vec3(0, 0, -1), new _math.Vec3(0, 0, 0), 0.2);
+        var mLight = new _light2.default(new _math.Vec3(-1, 10, -1), new _math.Vec3(1, 0.92, 0.78));
 
         var code = 0;
 
@@ -108,7 +107,6 @@ var main = function main() {
             mBasicShader.loadLight(mLight);
             mBasicShader.loadViewMatrix(mCamera);
             mRenderer.render(mEntity, mBasicShader);
-            mRenderer.render(mEntity2, mBasicShader);
             mBasicShader.stop();
         });
     }, 1000);
@@ -969,7 +967,7 @@ var Renderer = function () {
         value: function preRender() {
             this.gl.enable(this.gl.DEPTH_TEST);
             this.gl.enable(this.gl.CULL_FACE);
-            this.gl.clearColor(0.05, 0.1, 0.2, 255);
+            this.gl.clearColor(0.59, 0.84, 0.85, 255);
             this.gl.clear(this.gl.COLOR_BUFFER_BIT);
             this.gl.clear(this.gl.DEPTH_BUFFER_BIT);
             this.gl.viewport(0, 0, window.innerWidth, window.innerHeight);
@@ -1186,8 +1184,8 @@ exports.default = TexturedModel;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-var vertexShader = exports.vertexShader = "#version 300 es\n\nprecision highp float;\n\nin vec3 position;\nin vec2 textureCoords;\nin vec3 normals;\n\nuniform mat4 modelMatrix;\nuniform mat4 projectionMatrix;\nuniform mat4 viewMatrix;\nuniform vec3 lightPosition;\nuniform vec3 lightColor;\n\nout vec2 passedTextureCoords;\nout vec3 surfaceNormal;\nout vec3 toLightVector;\n\nvoid main(){\n    vec4 worldPosition = modelMatrix * vec4(position, 1.0f);\n    gl_Position = projectionMatrix * viewMatrix * worldPosition;\n    passedTextureCoords = textureCoords;\n\n    surfaceNormal = (modelMatrix * vec4(normals, 0.0)).xyz;\n    toLightVector = lightPosition - worldPosition.xyz;\n} \n";
+var vertexShader = exports.vertexShader = "#version 300 es\n\nprecision highp float;\n\nin vec3 position;\nin vec2 textureCoords;\nin vec3 normals;\n\nuniform mat4 modelMatrix;\nuniform mat4 projectionMatrix;\nuniform mat4 viewMatrix;\nuniform vec3 lightPosition;\nuniform vec3 lightColor;\n\nout vec2 passedTextureCoords;\nout vec3 surfaceNormal;\nout vec3 toLightVector;\n\nvoid main(){\n    vec4 worldPosition = modelMatrix * vec4(position, 1.0f);\n    gl_Position = projectionMatrix * viewMatrix * worldPosition;\n    passedTextureCoords = textureCoords;\n\n    surfaceNormal = (modelMatrix * vec4(normals, 0.0f)).xyz;\n    toLightVector = lightPosition - worldPosition.xyz;\n} \n";
 
-var fragmentShader = exports.fragmentShader = "#version 300 es\n\nprecision highp float;\n\nin vec2 passedTextureCoords;\nin vec3 surfaceNormal;\nin vec3 toLightVector;\n\nuniform sampler2D textureSampler;\nuniform vec3 lightColor;\n\nout vec4 out_Color;\n\nvoid main() {\n    vec3 unitNormal = normalize(surfaceNormal);\n    vec3 unitLightVector = normalize(toLightVector);\n    float nDotl = dot(unitNormal, unitLightVector);\n    float brightness = max(nDotl, 0.1);\n    vec3 diffuse = brightness * lightColor;\n    out_Color = vec4(diffuse, 1.0) * texture(textureSampler, passedTextureCoords);\n}";
+var fragmentShader = exports.fragmentShader = "#version 300 es\n\nprecision highp float;\n\nin vec2 passedTextureCoords;\nin vec3 surfaceNormal;\nin vec3 toLightVector;\n\nuniform sampler2D textureSampler;\nuniform vec3 lightColor;\n\nout vec4 out_Color;\n\nvoid main() {\n    vec3 unitNormal = normalize(surfaceNormal);\n    vec3 unitLightVector = normalize(toLightVector);\n    float nDotl = dot(unitNormal, unitLightVector);\n    float brightness = max(nDotl, 0.2);\n    vec3 diffuse = brightness * lightColor;\n    out_Color = vec4(diffuse, 1.0) * texture(textureSampler, passedTextureCoords);\n}";
 
 },{}]},{},[1]);
