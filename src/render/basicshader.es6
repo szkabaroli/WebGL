@@ -1,6 +1,6 @@
 import ShaderProgram from './shaderProgram';
 import { vertexShader, fragmentShader } from '../shaders/basicShader';
-import { Mat4, Utils} from './math';
+import Utils from './utils';
 import Camera from './camera';
 
 class BasicShader extends ShaderProgram{

@@ -1,5 +1,6 @@
 import { vertexShader, fragmentShader } from '../shaders/basicShader';
 import { mat4 } from 'vmath';
+
 class ShaderProgram{
 
     constructor(gl, vertexShader, fragmentShader) {

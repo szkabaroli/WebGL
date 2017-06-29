@@ -1,13 +1,6 @@
-import Camera from './camera';
-import {mat4, toRadian,toDegree, vec3} from 'vmath'
+import {mat4, toRadian, vec3} from 'vmath'
 
-export class Utils {
-    static toDeg(rad) {
-        return rad * (180 / Math.PI);
-    }
-    static toRad(deg) {
-        return deg * Math.PI / 180;
-    }
+export default class Utils {
 
     static createModelMatrix(t,r,s) {
         var matrix = mat4.create();
@@ -22,23 +15,30 @@ export class Utils {
     }
 
     static createProjectionMatrix(FOV , NEAR_PLANE , FAR_PLANE ) {
-        const aspectRatio = window.innerWidth / window.innerHeight;/*
-        const yScale = (1 / Math.tan(this.toRad(FOV / 2))) * aspectRatio;
+        const aspectRatio = window.innerWidth / window.innerHeight;
+        const yScale = (1 / Math.tan(toRadian(FOV / 2))) * aspectRatio;
         const xScale = yScale / aspectRatio;
         const frustumLength = FAR_PLANE - NEAR_PLANE;
 
-        let matrix = new Mat4();
-        matrix.m00 = xScale;
-        matrix.m05 = yScale;
-        matrix.m10 = -((FAR_PLANE + NEAR_PLANE) / frustumLength);
-        matrix.m11 = -1;
-        matrix.m14 = -(2 * NEAR_PLANE * FAR_PLANE) / frustumLength;
-        matrix.m15 = 0;
-        return matrix;*/
         let matrix = mat4.create();
-        mat4.identity(matrix);
-        mat4.perspective(matrix, 45, aspectRatio, NEAR_PLANE, FAR_PLANE);
-        console.log(matrix)
+        mat4.set(matrix, 
+        xScale,
+        0,
+        0,
+        0,
+        0,
+        yScale,
+        0,
+        0,
+        0,
+        0,
+        -((FAR_PLANE + NEAR_PLANE) / frustumLength),
+        -1,
+        0,
+        0,
+        -(2 * NEAR_PLANE * FAR_PLANE) / frustumLength,
+        0
+        )
         return matrix;
     }
 

@@ -7337,7 +7337,9 @@ var _shaderProgram2 = _interopRequireDefault(_shaderProgram);
 
 var _basicShader = require('../shaders/basicShader');
 
-var _math = require('./math');
+var _utils = require('./utils');
+
+var _utils2 = _interopRequireDefault(_utils);
 
 var _camera = require('./camera');
 
@@ -7391,19 +7393,19 @@ var BasicShader = function (_ShaderProgram) {
     }, {
         key: 'loadModelMatrix',
         value: function loadModelMatrix(entity) {
-            var modelMatrix = _math.Utils.createModelMatrix(entity.getPosition(), entity.getRotation(), entity.getScale());
+            var modelMatrix = _utils2.default.createModelMatrix(entity.getPosition(), entity.getRotation(), entity.getScale());
             _get(BasicShader.prototype.__proto__ || Object.getPrototypeOf(BasicShader.prototype), 'loadMatrix', this).call(this, this.modelMatrixLoc, modelMatrix);
         }
     }, {
         key: 'loadProjectionMatrix',
         value: function loadProjectionMatrix(FOV, NEAR_PLANE, FAR_PLANE) {
-            var projectionMatrix = _math.Utils.createProjectionMatrix(FOV, NEAR_PLANE, FAR_PLANE);
+            var projectionMatrix = _utils2.default.createProjectionMatrix(FOV, NEAR_PLANE, FAR_PLANE);
             _get(BasicShader.prototype.__proto__ || Object.getPrototypeOf(BasicShader.prototype), 'loadMatrix', this).call(this, this.projectionMatrixLoc, projectionMatrix);
         }
     }, {
         key: 'loadViewMatrix',
         value: function loadViewMatrix(camera) {
-            var viewMatrix = _math.Utils.createViewMatrix(camera);
+            var viewMatrix = _utils2.default.createViewMatrix(camera);
             _get(BasicShader.prototype.__proto__ || Object.getPrototypeOf(BasicShader.prototype), 'loadMatrix', this).call(this, this.viewMatrixLoc, viewMatrix);
         }
     }]);
@@ -7413,7 +7415,7 @@ var BasicShader = function (_ShaderProgram) {
 
 exports.default = BasicShader;
 
-},{"../shaders/basicShader":23,"./camera":6,"./math":12,"./shaderProgram":15}],5:[function(require,module,exports){
+},{"../shaders/basicShader":24,"./camera":6,"./shaderProgram":15,"./utils":23}],5:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -7430,7 +7432,9 @@ var _shaderProgram2 = _interopRequireDefault(_shaderProgram);
 
 var _basicShader = require('../shaders/basicShader');
 
-var _math = require('./math');
+var _utils = require('./utils');
+
+var _utils2 = _interopRequireDefault(_utils);
 
 var _camera = require('./camera');
 
@@ -7484,19 +7488,19 @@ var BasicShader = function (_ShaderProgram) {
     }, {
         key: 'loadModelMatrix',
         value: function loadModelMatrix(entity) {
-            var modelMatrix = _math.Utils.createModelMatrix(entity.getPosition(), entity.getRotation(), entity.getScale());
+            var modelMatrix = _utils2.default.createModelMatrix(entity.getPosition(), entity.getRotation(), entity.getScale());
             _get(BasicShader.prototype.__proto__ || Object.getPrototypeOf(BasicShader.prototype), 'loadMatrix', this).call(this, this.modelMatrixLoc, modelMatrix);
         }
     }, {
         key: 'loadProjectionMatrix',
         value: function loadProjectionMatrix(FOV, NEAR_PLANE, FAR_PLANE) {
-            var projectionMatrix = _math.Utils.createProjectionMatrix(FOV, NEAR_PLANE, FAR_PLANE);
+            var projectionMatrix = _utils2.default.createProjectionMatrix(FOV, NEAR_PLANE, FAR_PLANE);
             _get(BasicShader.prototype.__proto__ || Object.getPrototypeOf(BasicShader.prototype), 'loadMatrix', this).call(this, this.projectionMatrixLoc, projectionMatrix);
         }
     }, {
         key: 'loadViewMatrix',
         value: function loadViewMatrix(camera) {
-            var viewMatrix = _math.Utils.createViewMatrix(camera);
+            var viewMatrix = _utils2.default.createViewMatrix(camera);
             _get(BasicShader.prototype.__proto__ || Object.getPrototypeOf(BasicShader.prototype), 'loadMatrix', this).call(this, this.viewMatrixLoc, viewMatrix);
         }
     }]);
@@ -7506,7 +7510,7 @@ var BasicShader = function (_ShaderProgram) {
 
 exports.default = BasicShader;
 
-},{"../shaders/basicShader":23,"./camera":6,"./math":12,"./shaderProgram":15}],6:[function(require,module,exports){
+},{"../shaders/basicShader":24,"./camera":6,"./shaderProgram":15,"./utils":23}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -7628,7 +7632,7 @@ var DisplayManager = function () {
 
 exports.default = DisplayManager;
 
-},{"../shaders/basicShader":23}],8:[function(require,module,exports){
+},{"../shaders/basicShader":24}],8:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -7890,7 +7894,7 @@ var MasterRenderer = function () {
             this.shader.start();
 
             this.shader.loadViewMatrix(this.camera);
-            this.shader.loadProjectionMatrix(90, 0.001, 1000);
+            this.shader.loadProjectionMatrix(90, 0.01, 1000);
             this.shader.loadLight(this.light);
             this.shader.loadFogColor(_vmath.vec3.new(0.74, 0.96, 0.87));
 
@@ -8217,7 +8221,7 @@ var ShaderProgram = function () {
 
 exports.default = ShaderProgram;
 
-},{"../shaders/basicShader":23,"vmath":1}],16:[function(require,module,exports){
+},{"../shaders/basicShader":24,"vmath":1}],16:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -8718,7 +8722,7 @@ var ShadowShader = function (_ShaderProgram) {
 
 exports.default = ShadowShader;
 
-},{"../../shaders/shadowShader":24,"../math":12,"../shaderProgram":15}],21:[function(require,module,exports){
+},{"../../shaders/shadowShader":25,"../math":12,"../shaderProgram":15}],21:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8795,6 +8799,68 @@ var TexturedModel = function () {
 exports.default = TexturedModel;
 
 },{"./model":13,"./texture":21}],23:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _vmath = require('vmath');
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Utils = function () {
+    function Utils() {
+        _classCallCheck(this, Utils);
+    }
+
+    _createClass(Utils, null, [{
+        key: 'createModelMatrix',
+        value: function createModelMatrix(t, r, s) {
+            var matrix = _vmath.mat4.create();
+            _vmath.mat4.identity(matrix);
+            _vmath.mat4.translate(matrix, matrix, t);
+            _vmath.mat4.rotateX(matrix, matrix, (0, _vmath.toRadian)(r.x));
+            _vmath.mat4.rotateY(matrix, matrix, (0, _vmath.toRadian)(r.y));
+            _vmath.mat4.rotateZ(matrix, matrix, (0, _vmath.toRadian)(r.z));
+            _vmath.mat4.scale(matrix, matrix, _vmath.vec3.new(s, s, s));
+
+            return matrix;
+        }
+    }, {
+        key: 'createProjectionMatrix',
+        value: function createProjectionMatrix(FOV, NEAR_PLANE, FAR_PLANE) {
+            var aspectRatio = window.innerWidth / window.innerHeight;
+            var yScale = 1 / Math.tan((0, _vmath.toRadian)(FOV / 2)) * aspectRatio;
+            var xScale = yScale / aspectRatio;
+            var frustumLength = FAR_PLANE - NEAR_PLANE;
+
+            var matrix = _vmath.mat4.create();
+            _vmath.mat4.set(matrix, xScale, 0, 0, 0, 0, yScale, 0, 0, 0, 0, -((FAR_PLANE + NEAR_PLANE) / frustumLength), -1, 0, 0, -(2 * NEAR_PLANE * FAR_PLANE) / frustumLength, 0);
+            return matrix;
+        }
+    }, {
+        key: 'createViewMatrix',
+        value: function createViewMatrix(camera) {
+            var matrix = _vmath.mat4.create();
+            _vmath.mat4.identity(matrix);
+            _vmath.mat4.rotateX(matrix, matrix, (0, _vmath.toRadian)(camera.getRotation().x));
+            _vmath.mat4.rotateY(matrix, matrix, (0, _vmath.toRadian)(camera.getRotation().y));
+            var cameraPos = camera.getPosition();
+            var invert = _vmath.vec3.new(-cameraPos.x, -cameraPos.y, -cameraPos.z);
+            _vmath.mat4.translate(matrix, matrix, invert);
+            return matrix;
+        }
+    }]);
+
+    return Utils;
+}();
+
+exports.default = Utils;
+
+},{"vmath":1}],24:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8804,7 +8870,7 @@ var vertexShader = exports.vertexShader = "#version 300 es\n\nprecision mediump 
 
 var fragmentShader = exports.fragmentShader = "#version 300 es\n\nprecision mediump float;\n\nin vec2 passedTextureCoords;\nin vec3 surfaceNormal;\nin vec3 toLightVector;\nin float visiblity;\n\nuniform sampler2D textureSampler;\nuniform vec3 lightColor;\nuniform vec3 fogColor;\n\nout vec4 out_Color;\n\nvoid main() {\n    vec3 unitNormal = normalize(surfaceNormal);\n    vec3 unitLightVector = normalize(toLightVector);\n    float nDotl = dot(unitNormal, unitLightVector);\n    float brightness = max(nDotl, 0.2);\n    vec3 diffuse = brightness * lightColor;\n    out_Color = vec4(diffuse, 1.0) * texture(textureSampler, passedTextureCoords);\n    out_Color = mix(vec4(fogColor, 1.0), out_Color, visiblity);\n}";
 
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {

@@ -32,7 +32,7 @@ class MasterRenderer {
         this.shader.start();
 
         this.shader.loadViewMatrix(this.camera);
-        this.shader.loadProjectionMatrix(90, 0.001, 1000);
+        this.shader.loadProjectionMatrix(90, 0.01, 1000);
         this.shader.loadLight(this.light);
         this.shader.loadFogColor(vec3.new(0.74,0.96,0.87));
         
