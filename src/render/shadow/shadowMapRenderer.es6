@@ -1,25 +1,27 @@
 import ShadowShader from './shadowShader';
 import ShadowBox from './shadowBox';
 import ShadowFrameBuffer from './shadowFrameBuffer';
+import EntityRenderer from './shadowMapEntityRenderer';
 import {Mat4, Vec3} from '../math';
 
 class ShadowMapRenderer {
-    constructor(camera, gl) {
+    constructor(gl, camera) {
+        this.gl = gl;
         this.SHADOW_MAP_SIZE = 2048;
         this.lightViewMatrix = new Mat4();
         this.projectionMatrix = new Mat4();
         this.pvMatrix = new Mat4();
-        this.offset = this.createOffsett()
+        this.offset = this.createOffset()
 
-        this.shader = new ShadowShader();
+        this.shader = new ShadowShader(this.gl);
         this.shadowBox = new ShadowBox(this.lightViewMatrix, camera);
-        this.shadowFBO = new ShadowFrameBuffer(gl, this.SHADOW_MAP_SIZE, this.SHADOW_MAP_SIZE);
+        this.shadowFBO = new ShadowFrameBuffer(this.gl, this.SHADOW_MAP_SIZE, this.SHADOW_MAP_SIZE);
         this.entityRenderer = new EntityRenderer(this.shader, this.pvMatrix);
     }
-    render(entities) {
+    render(entities, light) {
         this.shadowBox.update();
-        let sunPosition = sun.getPosition();
-        let lightDirection = new Vec3(-sunPosition.x, -sunPosition.y, -sunPosition.z);
+        let lightPosition = light.getPosition();
+        let lightDirection = new Vec3(-lightPosition.x, -lightPosition.y, -lightPosition.z);
         this.prepare(lightDirection, this.shadowBox);
         this.entityRenderer.render(entities);
         this.finish();
@@ -73,7 +75,7 @@ class ShadowMapRenderer {
     }
 
     getShadowMap() {
-        return this.shadowFbo.getShadowMap();
+        return this.shadowFBO.getShadowMap();
     }
 
    getLightSpaceTransform() {

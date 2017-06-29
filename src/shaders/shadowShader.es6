@@ -20,5 +20,5 @@ out vec4 outColor;
 uniform sampler2D modelTexture;
 
 void main() {
-    outColor = vec4(1.0)    
+    outColor = vec4(1.0);
 }`;

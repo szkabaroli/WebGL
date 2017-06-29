@@ -30,3 +30,5 @@ class ShadowMapEntityRenderer {
         this.shader.loadMvpMatrix(entity, pvMatrix);
     }
 }
+
+export default ShadowMapEntityRenderer;

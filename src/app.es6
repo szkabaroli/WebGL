@@ -22,7 +22,10 @@ class main {
 
         //create loader and renderer
         const mLoader = new Loader(this.gl)
-        const mRenderer = new MasterRenderer(this.gl);
+        const mCamera = new Camera(new Vec3(0,0,0), new Vec3(0,0,0));
+        const mRenderer = new MasterRenderer(this.gl, mCamera);
+
+        
         
 
         var model = OBJLoader.loadOBJModel('res/cube.obj');
@@ -30,8 +33,8 @@ class main {
         setTimeout(()=> {
         var Model = mLoader.loadToVAO(model.v, model.t, model.n, model.i);
         var Texture = mLoader.loadTexture('res/grid.png');
+        console.log(mRenderer.getShadowMap());
         var Cube = new TexturedModel(Model, Texture);
-        var mCamera = new Camera(new Vec3(0,0,0), new Vec3(0,0,0));
         var mEntity = new Entity(Cube, new Vec3(0,0,-2), new Vec3(0,0,0), 20);
         var mLight = new Light(new Vec3(-1000,1000,1000), new Vec3(1,0.92,0.78));
 

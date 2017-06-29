@@ -21,3 +21,5 @@ class ShadowShader extends ShaderProgram {
         super.loadMatrix(this.mvpMatrixLocation, mvpMatrix);
     }
 }
+
+export default ShadowShader;

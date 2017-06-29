@@ -25,7 +25,6 @@ class Camera {
             this.position.y += (0.01 * this.SPEED);
         }
         if(code == 81) {
-            console.log('fdfsd')
             this.position.y -= (0.01 * this.SPEED);
         }
     }

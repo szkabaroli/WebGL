@@ -53,7 +53,7 @@ export class Vec2 {
         this.x = x;
         this.y = y;
     }
-    
+
     length() {
         return Math.sqrt(this.x * this.x + this.y * this.y);
     }
@@ -355,7 +355,6 @@ export class Utils {
     }
 
     static createViewMatrix(camera) {
-        console.log(camera)
         var matrix = new Mat4();
         matrix.identity();
         matrix.rotateX(this.toRad(camera.getRotation().x));

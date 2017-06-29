@@ -1,12 +1,15 @@
 import BasicShader from './basicShader';
 import Renderer from './renderer';
 import {Vec3} from './math';
+import ShadowMapRenderer from './shadow/shadowMapRenderer';
 
 class MasterRenderer {
-    constructor(gl) {
+    constructor(gl, camera) {
+        this.camera = camera;
         this.shader = new BasicShader(gl);
         this.renderer = new Renderer(gl, this.shader);
         this.entities = new Map();
+        this.shadowMapRenderer = new ShadowMapRenderer(gl, camera);
     }
 
     processEntity(entity) {
@@ -17,6 +20,19 @@ class MasterRenderer {
             var entities = [entity];
             this.entities.set(model, entities)
         }
+    }
+
+    renderShadowMap(entities, light) {
+        entities.forEach((entity)=>{
+            this.processEntity(entity)
+        })
+        this.shadowMapRenderer.render(entities, light);
+        this.entities.clear();
+
+    }
+
+    getShadowMap() {
+        return this.shadowMapRenderer.getShadowMap();
     }
 
     render(light, camera) {
