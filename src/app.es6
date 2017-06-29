@@ -32,7 +32,7 @@ class main {
         var Texture = mLoader.loadTexture('res/grid.png');
         var Cube = new TexturedModel(Model, Texture);
         var mCamera = new Camera(new Vec3(0,0,0), new Vec3(0,0,0));
-        var mEntity = new Entity(Cube, new Vec3(0,0,-2), new Vec3(0,0,0), 1);
+        var mEntity = new Entity(Cube, new Vec3(0,0,-2), new Vec3(0,0,0), 20);
         var mLight = new Light(new Vec3(-1000,1000,1000), new Vec3(1,0.92,0.78));
 
         var code = 0;
@@ -70,7 +70,7 @@ class main {
             mDisplayManager.resize();
             
             //mEntity.increasePosition(new Vec3(0,0,0))
-            mEntity.increaseRotation(new Vec3(0,1,0));
+            //mEntity.increaseRotation(new Vec3(0,1,0));
 
             mRenderer.processEntity(mEntity);
             mRenderer.render(mLight, mCamera);

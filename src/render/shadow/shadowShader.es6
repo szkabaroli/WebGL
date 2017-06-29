@@ -1,6 +1,6 @@
-import ShaderProgram from './shaderprogram';
-import { vertexShader, fragmentShader } from '../shaders/shadowShader';
-import {Utils} from ''
+import ShaderProgram from '../shaderProgram';
+import { vertexShader, fragmentShader } from '../../shaders/shadowShader';
+import {Utils} from '../math';
 
 class ShadowShader extends ShaderProgram {
     constructor(gl) {

@@ -15,6 +15,15 @@ export class Vec2 {
     }
 }
 
+export class Vec4 {
+    constructor(x = 0, y = 0, z = 0, w = 0) {
+        this.x = x;
+        this.y = y;
+        this.z = w;
+        this.w = w;
+    }
+}
+
 export class Mat4 {
     
     constructor(m00 = 0, m01 = 0, m02 = 0, m03 = 0,

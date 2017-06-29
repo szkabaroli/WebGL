@@ -73,7 +73,7 @@ var main = function main() {
         var Texture = mLoader.loadTexture('res/grid.png');
         var Cube = new _texturedModel2.default(Model, Texture);
         var mCamera = new _camera2.default(new _math.Vec3(0, 0, 0), new _math.Vec3(0, 0, 0));
-        var mEntity = new _entity2.default(Cube, new _math.Vec3(0, 0, -2), new _math.Vec3(0, 0, 0), 1);
+        var mEntity = new _entity2.default(Cube, new _math.Vec3(0, 0, -2), new _math.Vec3(0, 0, 0), 20);
         var mLight = new _light2.default(new _math.Vec3(-1000, 1000, 1000), new _math.Vec3(1, 0.92, 0.78));
 
         var code = 0;
@@ -111,7 +111,7 @@ var main = function main() {
             mDisplayManager.resize();
 
             //mEntity.increasePosition(new Vec3(0,0,0))
-            mEntity.increaseRotation(new _math.Vec3(0, 1, 0));
+            //mEntity.increaseRotation(new Vec3(0,1,0));
 
             mRenderer.processEntity(mEntity);
             mRenderer.render(mLight, mCamera);
@@ -805,7 +805,7 @@ exports.default = MasterRenderer;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.Utils = exports.Mat4 = exports.Vec2 = exports.Vec3 = undefined;
+exports.Utils = exports.Mat4 = exports.Vec4 = exports.Vec2 = exports.Vec3 = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -837,6 +837,20 @@ var Vec2 = exports.Vec2 = function Vec2() {
 
     this.x = x;
     this.y = y;
+};
+
+var Vec4 = exports.Vec4 = function Vec4() {
+    var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+    var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+    var z = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+    var w = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
+
+    _classCallCheck(this, Vec4);
+
+    this.x = x;
+    this.y = y;
+    this.z = w;
+    this.w = w;
 };
 
 var Mat4 = exports.Mat4 = function () {
