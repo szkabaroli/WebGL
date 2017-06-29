@@ -6,12 +6,56 @@ export class Vec3 {
         this.y = y;
         this.z = z;
     }
+
+    scale(scale) {
+        let x = this.x * scale;
+		let y = this.y * scale;
+		let z = this.z * scale;
+        return new Vec3(x,y,z);
+    }
+
+    add(right) {
+        let x = this.x + right.x;
+        let y = this.y + right.y;
+        let z = this.z + right.z;
+        return new Vec3(x, y, z);
+    }
+
+    cross(right) {
+        let x = this.y * right.z - this.z * right.y;
+        let y = this.x * right.z - this.z * right.x;
+        let z = this.x * right.y - this.y * right.x;
+        return new Vec3(x, y, z);
+    }
+    negate() {
+        this.x = -this.x;
+		this.y = -this.y;
+		this.z = -this.z;
+    }
+    normalize(a) {
+        let x = a.x,
+            y = a.y,
+            z = a.z;
+
+        let len = x * x + y * y + z * z;
+
+        if (len > 0) {
+            len = 1 / Math.sqrt(len);
+            this.x = x * len;
+            this.y = y * len;
+            this.z = z * len;
+        }
+    }
 }
 
 export class Vec2 {
     constructor(x = 0, y = 0) {
         this.x = x;
         this.y = y;
+    }
+    
+    length() {
+        return Math.sqrt(this.x * this.x + this.y * this.y);
     }
 }
 
@@ -217,11 +261,68 @@ export class Mat4 {
         this.m13 = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
         this.m14 = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
         this.m15 = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
+        
     }
-}
+
+    transform(right) {
+        const x = this.m00 * right.x + this.m10 * this.y + left.m20 * this.z + left.m30 * this.w;
+		const y = this.m01 * right.x + this.m11 * this.y + left.m21 * this.z + left.m31 * this.w;
+		const z = this.m02 * right.x + this.m12 * this.y + left.m22 * this.z + left.m32 * this.w;
+		const w = this.m03 * right.x + this.m13 * this.y + left.m23 * this.z + left.m33 * this.w;
+        return new Vec4(x, y, z, w);
+    }
+
+    invert(a) {
+        let a00 = a.m00, a01 = a.m01, a02 = a.m02, a03 = a.m03,
+            a10 = a.m04, a11 = a.m05, a12 = a.m06, a13 = a.m07,
+            a20 = a.m08, a21 = a.m09, a22 = a.m10, a23 = a.m11,
+            a30 = a.m12, a31 = a.m13, a32 = a.m14, a33 = a.m15;
+
+        let b00 = a00 * a11 - a01 * a10;
+        let b01 = a00 * a12 - a02 * a10;
+        let b02 = a00 * a13 - a03 * a10;
+        let b03 = a01 * a12 - a02 * a11;
+        let b04 = a01 * a13 - a03 * a11;
+        let b05 = a02 * a13 - a03 * a12;
+        let b06 = a20 * a31 - a21 * a30;
+        let b07 = a20 * a32 - a22 * a30;
+        let b08 = a20 * a33 - a23 * a30;
+        let b09 = a21 * a32 - a22 * a31;
+        let b10 = a21 * a33 - a23 * a31;
+        let b11 = a22 * a33 - a23 * a32;
+
+        // Calculate the determinant
+        let det = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
+        
+        if (!det) {
+            return;
+        }
+
+        det = 1.0 / det;
+
+        this.m00 = (a11 * b11 - a12 * b10 + a13 * b09) * det;
+        this.m01 = (a02 * b10 - a01 * b11 - a03 * b09) * det;
+        this.m02 = (a31 * b05 - a32 * b04 + a33 * b03) * det;
+        this.m03 = (a22 * b04 - a21 * b05 - a23 * b03) * det;
+        this.m04 = (a12 * b08 - a10 * b11 - a13 * b07) * det;
+        this.m05 = (a00 * b11 - a02 * b08 + a03 * b07) * det;
+        this.m06 = (a32 * b02 - a30 * b05 - a33 * b01) * det;
+        this.m07 = (a20 * b05 - a22 * b02 + a23 * b01) * det;
+        this.m08 = (a10 * b10 - a11 * b08 + a13 * b06) * det;
+        this.m09 = (a01 * b08 - a00 * b10 - a03 * b06) * det;
+        this.m10 = (a30 * b04 - a31 * b02 + a33 * b00) * det;
+        this.m11 = (a21 * b02 - a20 * b04 - a23 * b00) * det;
+        this.m12 = (a11 * b07 - a10 * b09 - a12 * b06) * det;
+        this.m13 = (a00 * b09 - a01 * b07 + a02 * b06) * det;
+        this.m14 = (a31 * b01 - a30 * b03 - a32 * b00) * det;
+        this.m15 = (a20 * b03 - a21 * b01 + a22 * b00) * det;
+        }
+    }
 
 export class Utils {
-
+    static toDeg(rad) {
+        return rad * (180 / Math.PI);
+    }
     static toRad(deg) {
         return deg * Math.PI / 180;
     }
