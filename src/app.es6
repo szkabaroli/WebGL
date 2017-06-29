@@ -1,12 +1,10 @@
 import DisplayManager from './render/context';
-import Renderer from './render/renderer'
-import Model from './render/model'
-import Loader from './render/loader'
-import BasicShader from './render/basicshader';
+import Model from './render/model';
+import Loader from './render/loader';
 import TexturedModel from './render/texturedModel';
 import Texture from './render/texture';
 import Entity from './render/entity';
-import { Vec3 } from './render/math';
+import { vec3 } from 'vmath';
 import Camera from './render/camera';
 import OBJLoader from './render/OBJLoader';
 import Light from './render/light'; 
@@ -15,28 +13,23 @@ import MasterRenderer from './render/masterRenderer';
 class main {
 
     constructor() {
-
         //create display
         const mDisplayManager = new DisplayManager();
         this.gl = mDisplayManager.createDisplay('gl');
 
         //create loader and renderer
         const mLoader = new Loader(this.gl)
-        const mCamera = new Camera(new Vec3(0,0,0), new Vec3(0,0,0));
-        const mRenderer = new MasterRenderer(this.gl, mCamera);
-
-        
-        
+        const mCamera = new Camera(vec3.new(0,0,0), vec3.new(0,0,0));
+        var mLight = new Light(vec3.new(-1000,1000,1000), vec3.new(1,1,1));
+        const mRenderer = new MasterRenderer(this.gl, mCamera, mLight);
 
         var model = OBJLoader.loadOBJModel('res/cube.obj');
         
         setTimeout(()=> {
         var Model = mLoader.loadToVAO(model.v, model.t, model.n, model.i);
         var Texture = mLoader.loadTexture('res/grid.png');
-        console.log(mRenderer.getShadowMap());
         var Cube = new TexturedModel(Model, Texture);
-        var mEntity = new Entity(Cube, new Vec3(0,0,-2), new Vec3(0,0,0), 20);
-        var mLight = new Light(new Vec3(-1000,1000,1000), new Vec3(1,0.92,0.78));
+        var mEntity = new Entity(Cube, vec3.new(0,0,-2), vec3.new(0,0,0), 2);
 
         var code = 0;
         document.onkeydown = (e) => {
@@ -72,8 +65,8 @@ class main {
             mCamera.move(code);
             mDisplayManager.resize();
             
-            //mEntity.increasePosition(new Vec3(0,0,0))
-            //mEntity.increaseRotation(new Vec3(0,1,0));
+            //mEntity.increasePosition(vec3.new(0,0,0))
+            mEntity.increaseRotation(vec3.new(0,1,0));
 
             mRenderer.processEntity(mEntity);
             mRenderer.render(mLight, mCamera);

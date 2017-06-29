@@ -1,7 +1,6 @@
 import Entity from './entity'
 import BasicShader from './basicshader';
 import TexturedModel from './texturedModel';
-import { Utils, Vec3, Mat4 } from './math';
 
 export default class Renderer {
 

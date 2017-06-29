@@ -1,5 +1,5 @@
 import { vertexShader, fragmentShader } from '../shaders/basicShader';
-import { Mat4, Vec3 } from './math';
+import { mat4 } from 'vmath';
 class ShaderProgram{
 
     constructor(gl, vertexShader, fragmentShader) {
@@ -43,7 +43,9 @@ class ShaderProgram{
     }
 
     loadMatrix(location, matrix) {
-        this.gl.uniformMatrix4fv(location, false, matrix.toArray()); 
+        let array = [];
+        mat4.array(array, matrix)
+        this.gl.uniformMatrix4fv(location, false, array); 
     }
 
     getUniformLocation(unifomrName) {

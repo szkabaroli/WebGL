@@ -1,15 +1,16 @@
 import BasicShader from './basicShader';
 import Renderer from './renderer';
-import {Vec3} from './math';
+import { vec3 } from 'vmath';
 import ShadowMapRenderer from './shadow/shadowMapRenderer';
 
 class MasterRenderer {
-    constructor(gl, camera) {
+    constructor(gl, camera, light) {
+        this.light = light;
         this.camera = camera;
         this.shader = new BasicShader(gl);
         this.renderer = new Renderer(gl, this.shader);
         this.entities = new Map();
-        this.shadowMapRenderer = new ShadowMapRenderer(gl, camera);
+        //this.shadowMapRenderer = new ShadowMapRenderer(gl, camera);
     }
 
     processEntity(entity) {
@@ -22,27 +23,18 @@ class MasterRenderer {
         }
     }
 
-    renderShadowMap(entities, light) {
-        entities.forEach((entity)=>{
-            this.processEntity(entity)
-        })
-        this.shadowMapRenderer.render(entities, light);
-        this.entities.clear();
-
+    render() {
+        this.renderModels()
     }
 
-    getShadowMap() {
-        return this.shadowMapRenderer.getShadowMap();
-    }
-
-    render(light, camera) {
+    renderModels() {
         this.renderer.preRender();
         this.shader.start();
 
-        this.shader.loadViewMatrix(camera);
+        this.shader.loadViewMatrix(this.camera);
         this.shader.loadProjectionMatrix(90, 0.001, 1000);
-        this.shader.loadLight(light);
-        this.shader.loadFogColor(new Vec3(0.74,0.96,0.87));
+        this.shader.loadLight(this.light);
+        this.shader.loadFogColor(vec3.new(0.74,0.96,0.87));
         
         this.renderer.render(this.entities);
         this.shader.stop();
