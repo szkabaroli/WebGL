@@ -2,30 +2,31 @@ import DisplayManager from './render/context';
 import Model from './render/model';
 import Loader from './render/loader';
 import TexturedModel from './render/texturedModel';
+import GUITexture from './render/gui/guiTexture';
 import Texture from './render/texture';
 import Entity from './render/entity';
-import { vec3 } from 'vmath';
+import { vec3, vec2 } from 'vmath';
 import Camera from './render/camera';
 import OBJLoader from './render/OBJLoader';
 import Light from './render/light'; 
 import MasterRenderer from './render/masterRenderer'; 
+import {toRadian} from 'vmath'
 
-class main {
 
-    constructor() {
         //create display
         const mDisplayManager = new DisplayManager();
-        this.gl = mDisplayManager.createDisplay('gl');
-
+        var gl = mDisplayManager.createDisplay('gl');
         //create loader and renderer
-        const mLoader = new Loader(this.gl)
+        const mLoader = new Loader(gl)
         const mCamera = new Camera(vec3.new(0,0,0), vec3.new(0,0,0));
-        var mLight = new Light(vec3.new(-1000,1000,1000), vec3.new(1,1,1));
-        const mRenderer = new MasterRenderer(this.gl, mCamera, mLight);
+        var mLight = new Light(vec3.new(-5,5,5), vec3.new(1,1,1));
+        const mRenderer = new MasterRenderer(gl, mCamera, mLight, mLoader);
 
-        var model = OBJLoader.loadOBJModel('res/cube.obj');
+        var model = OBJLoader.loadOBJModel('res/test.obj');
         
         setTimeout(()=> {
+
+
         var Model = mLoader.loadToVAO(model.v, model.t, model.n, model.i);
         var Texture = mLoader.loadTexture('res/grid.png');
         var Cube = new TexturedModel(Model, Texture);
@@ -56,12 +57,14 @@ class main {
         document.onkeyup = () => {
             code = 0;
         }
-
-        var fpsCounter = document.getElementById('counter');
-        var lastLoop = new Date;
+        
+        //var t = mRenderer.getShadowMap();
+        //let p = new Texture(10);
+        
+        let mGui = new GUITexture(mLoader.loadT(mRenderer.getShadowMap()), vec2.new(0.5, 0.5), vec2.new(0.25, 0.25));
 
         mDisplayManager.updateDisplay(() => {
-            var thisLoop = new Date;
+
             mCamera.move(code);
             mDisplayManager.resize();
             
@@ -69,17 +72,10 @@ class main {
             mEntity.increaseRotation(vec3.new(0,1,0));
 
             mRenderer.processEntity(mEntity);
+            mRenderer.processGui(mGui);
+
             mRenderer.render(mLight, mCamera);
-
-            var fps = 1000 / (thisLoop - lastLoop);
-            fpsCounter.innerHTML = Math.round(fps);
-            
-            lastLoop = thisLoop;
         })
-        
-        }, 1000)
+        }, 100)
         //mLoader.cleanUp();
-    }
-}
-
-new main;
+    

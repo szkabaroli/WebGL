@@ -1,8 +1,8 @@
 class ShadowMapEntityRenderer {
-    constructor(gl, shader, pvMatrix) {
+    constructor(gl, shader, projectionViewMatrix) {
         this.gl = gl;
         this.shader = shader;
-        this.pvMatrix = pvMatrix;
+        this.projectionViewMatrix = projectionViewMatrix;
     }
     
     render(entitiesMap) {
@@ -27,7 +27,7 @@ class ShadowMapEntityRenderer {
     }
 
     perEntity(entity) {
-        this.shader.loadMvpMatrix(entity, pvMatrix);
+        this.shader.loadMvpMatrix(entity, this.projectionViewMatrix);
     }
 }
 

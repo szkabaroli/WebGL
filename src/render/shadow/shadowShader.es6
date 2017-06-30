@@ -1,6 +1,7 @@
 import ShaderProgram from '../shaderProgram';
 import { vertexShader, fragmentShader } from '../../shaders/shadowShader';
-import {Utils} from '../math';
+import Utils from '../utils';
+import {mat4} from 'vmath';
 
 class ShadowShader extends ShaderProgram {
     constructor(gl) {
@@ -15,9 +16,10 @@ class ShadowShader extends ShaderProgram {
         this.mvpMatrixLocation = super.getUniformLocation('mvpMatrix');
     }
 
-    loadMvpMatrix(entity, pvMatrix) {
+    loadMvpMatrix(entity, projectionViewMatrix) {
         const modelMatrix = Utils.createModelMatrix(entity.getPosition(), entity.getRotation(), entity.getScale());
-        const mvpMatrix = pvMatrix.multiply(modelMatrix);
+        const mvpMatrix = mat4.create();
+        mat4.multiply(mvpMatrix, projectionViewMatrix, modelMatrix);
         super.loadMatrix(this.mvpMatrixLocation, mvpMatrix);
     }
 }

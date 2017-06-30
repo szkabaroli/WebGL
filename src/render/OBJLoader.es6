@@ -1,5 +1,4 @@
 import Loader from './loader';
-import {Vec3, Vec2} from './math';
 
 class OBJLoader {
 

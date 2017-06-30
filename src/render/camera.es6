@@ -1,4 +1,3 @@
-import { Vec3 } from './math';
 
 class Camera {
 
@@ -36,6 +35,18 @@ class Camera {
     getRotation() {
         return this.rotation;
     }
+
+    getPitch() {
+        return this.rotation.x;
+    }
+
+    getYaw() {
+        return this.rotation.y;
+    }
+
+    getRoll() {
+        return this.rotation.z;
+    } 
 }
 
 export default Camera;

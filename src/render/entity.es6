@@ -1,5 +1,4 @@
 import TexturedModel from './texturedModel';
-import { Vec3 } from './math';
 
 class Entity {
     

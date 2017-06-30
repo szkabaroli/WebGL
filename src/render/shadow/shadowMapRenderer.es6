@@ -2,26 +2,27 @@ import ShadowShader from './shadowShader';
 import ShadowBox from './shadowBox';
 import ShadowFrameBuffer from './shadowFrameBuffer';
 import EntityRenderer from './shadowMapEntityRenderer';
-import {Mat4, Vec3} from '../math';
+import {vec3, vec2, mat4, toDegree, toRadian} from 'vmath';
 
 class ShadowMapRenderer {
     constructor(gl, camera) {
         this.gl = gl;
         this.SHADOW_MAP_SIZE = 2048;
-        this.lightViewMatrix = new Mat4();
-        this.projectionMatrix = new Mat4();
-        this.pvMatrix = new Mat4();
+        this.projectionMatrix = mat4.create();
+        this.lightViewMatrix = mat4.create();
+        this.projectionViewMatrix = mat4.create();
         this.offset = this.createOffset()
 
         this.shader = new ShadowShader(this.gl);
         this.shadowBox = new ShadowBox(this.lightViewMatrix, camera);
         this.shadowFBO = new ShadowFrameBuffer(this.gl, this.SHADOW_MAP_SIZE, this.SHADOW_MAP_SIZE);
-        this.entityRenderer = new EntityRenderer(this.shader, this.pvMatrix);
+        this.entityRenderer = new EntityRenderer(this.gl, this.shader, this.projectionViewMatrix);
     }
     render(entities, light) {
         this.shadowBox.update();
         let lightPosition = light.getPosition();
-        let lightDirection = new Vec3(-lightPosition.x, -lightPosition.y, -lightPosition.z);
+        let lightDirection = vec3.create();
+        vec3.negate(lightDirection, lightPosition);
         this.prepare(lightDirection, this.shadowBox);
         this.entityRenderer.render(entities);
         this.finish();
@@ -36,41 +37,42 @@ class ShadowMapRenderer {
         this.updateOrthoProjectionMatrix(box.getWidth(), box.getHeight(), box.getLength());
         this.updateLightViewMatrix(lightDirection, box.getCenter());
 
-        this.pvMatrix.multiply(lightViewMatrix);
+        mat4.mul(this.projectionViewMatrix, this.projectionMatrix, this.lightViewMatrix);
 
         this.shadowFBO.bindFrameBuffer();
-        this.gl.enable(this.gl.DEPTH_TEST);
-        this.gl.clear(this.gl.DEPTH_BUFFER_BIT);
+        this.gl.clearColor(1, 0, 0, 1);
+        this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
         this.shader.start();
     }
 
     updateLightViewMatrix(direction, center) {
-        direction.normalize();
-        center.negate();
+        vec3.normalize(direction, direction);
+        vec3.negate(center, center);
 
-        this.lightViewMatrix.identity();
-
-        var pitch = Math.acos(new Vec2(direction.x, direction.z).length());
-        lightViewMatrix.rotateX(pitch);
-
-        var yaw = Utils.toDeg((Math.atan(direction.x / direction.z)));
+        mat4.identity(this.lightViewMatrix);
+        
+        let pitch = Math.acos(vec2.length(vec2.new(direction.x, direction.z)));
+        mat4.rotateX(this.lightViewMatrix, this.lightViewMatrix, pitch);
+        
+        let yaw = toDegree(Math.atan(direction.x / direction.z));
         yaw = direction.z > 0 ? yaw - 180 : yaw;
-
-        lightViewMatrix.rotateY(-Utils.toRad(yaw));
-        lightViewMatrix.translate(center);
+        
+        mat4.rotateY(this.lightViewMatrix, this.lightViewMatrix, -toRadian(yaw));
+        mat4.translate(this.lightViewMatrix, this.lightViewMatrix, center);
     }
+
     updateOrthoProjectionMatrix(width,height,length) {
-        this.projectionMatrix.setIdentity();
+        mat4.identity(this.projectionMatrix);
         this.projectionMatrix.m00 = 2 / width;
-        this.projectionMatrix.m05 = 2 / height;
-        this.projectionMatrix.m10 = -2 / length;
-        this.projectionMatrix.m15 = 1;
+        this.projectionMatrix.m11 = 2 / height;
+        this.projectionMatrix.m22 = -2 / length;
+        this.projectionMatrix.m33 = 1;
     }
 
     createOffset() {
-        let offset = new Mat4();
-        offset.translate(new Vec3(0.5, 0.5, 0.5));
-        offset.scale(new Vec3(0.5, 0.5, 0.5));
+        let offset = mat4.create();
+        mat4.translate(offset, offset, vec3.new(0.5, 0.5, 0.5));
+        mat4.scale(offset, offset, vec3.new(0.5, 0.5, 0.5));
         return offset;
     }
 
@@ -78,7 +80,7 @@ class ShadowMapRenderer {
         return this.shadowFBO.getShadowMap();
     }
 
-   getLightSpaceTransform() {
+    getLightSpaceTransform() {
         return this.lightViewMatrix;
     }
 }

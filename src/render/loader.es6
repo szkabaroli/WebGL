@@ -17,6 +17,13 @@ export default class Loader {
         return new Model(vaoID, indicies.length);
     }
 
+    loadGUIToVAO(positions) {
+        var vaoID = this.createVAO();
+        this.storeDataInAttributeList(0, 2, positions);
+        this.unbindVAO();
+        return new Model(vaoID, positions.length/2);
+    }
+
     loadTexture(fileName ) {
         var textureId = this.gl.createTexture();
         var image = new Image();
@@ -32,6 +39,10 @@ export default class Loader {
             this.gl.bindTexture(this.gl.TEXTURE_2D, null);
         }
         return new Texture(textureId);
+    }
+
+    loadT(id) {
+        return new Texture(id);
     }
 
     createVAO() {

@@ -1,34 +1,44 @@
 import Entity from './entity'
 import BasicShader from './basicshader';
 import TexturedModel from './texturedModel';
+import { vec3 } from 'vmath';
 
 export default class Renderer {
 
-    
-
-    constructor(gl, shader) {
-        this.shader = shader;
+    constructor(gl, camera, light) {
         this.gl = gl;
+        this.shader = new BasicShader(gl);
+
+        this.light = light;
+        this.camera = camera;
     }
 
     preRender() {
-        this.gl.enable(this.gl.DEPTH_TEST);
-        this.gl.enable(this.gl.CULL_FACE);
+        this.gl.viewport(0,0,window.innerWidth, window.innerHeight)
         this.gl.clearColor(0.59, 0.84, 0.85, 255);
-        this.gl.clear(this.gl.COLOR_BUFFER_BIT);
-        this.gl.clear(this.gl.DEPTH_BUFFER_BIT);
-        this.gl.viewport(0,0,window.innerWidth, window.innerHeight);
+        this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
     }
 
     render(entitiesMap) {
+        this.shader.start();
+
+        this.shader.loadViewMatrix(this.camera);
+        this.shader.loadProjectionMatrix(90, 0.01, 1000);
+        this.shader.loadLight(this.light);
+        this.shader.loadFogColor(vec3.new(0.74,0.96,0.87));
+
         entitiesMap.forEach((entities, model)=>{
             this.prepareTexturedModel(model);
             entities.forEach((entity)=>{
-                this.perEntity(entity);
+
+                this.shader.loadModelMatrix(entity);
+
                 this.gl.drawElements(this.gl.TRIANGLES, model.getModel().getVertexCount(), this.gl.UNSIGNED_INT, 0);
             });
             this.unbindTexturedModel();
         });
+
+        this.shader.stop();
     }
 
     prepareTexturedModel(model) {
@@ -48,7 +58,4 @@ export default class Renderer {
         this.gl.bindVertexArray(null);
     }
 
-    perEntity(entity) {
-        this.shader.loadModelMatrix(entity);
-    }
 }

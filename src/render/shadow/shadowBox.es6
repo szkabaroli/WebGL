@@ -1,30 +1,39 @@
-import {Utils, Vec3, Vec4, Mat4} from '../math';
+import { vec4, vec3, vec2, mat4, toRadian } from 'vmath';
 
 class ShadowBox {
-    constructor(lightViewMAtrix, camera) {
+    constructor(lightViewMatrix, camera) {
         this.OFFSET = 10;
-        this.UP = new Vec4(0,1,0,0);
-        this.FOWARD = new Vec4(0,0,-1,0);
+        this.UP = vec3.create(0,1,0);
+        this.FORWARD = vec3.create(0,0,-1);
         this.SHADWO_DISTANCE = 200;
         this.NEAR_PLANE = 0.001;
         this.FOV = 90;
-        this.lightViewMAtrix;
+        this.lightViewMatrix = lightViewMatrix;
         this.camera = camera;
+
+        this.farHeight;
+        this.farWidth;
+        this.nearHeight;
+        this.nearWidth;
     }
 
     update() {
-
         let rotation = this.calculateCameraRotationMatrix();
-        rotation = rotation.transform(this.FORWARD);
-        let forwardVector = new Vec3(rotation.x, rotation.y, rotation.z);
+        let forwardVector = vec3.create();
+        vec3.transformMat4(forwardVector, this.FORWARD, rotation);
  
-        let centerFar = new Vec3(forwardVector.x, forwardVector.y, forwardVector.z);
-        centerFar.scale(this.SHADOW_DISTANCE);
-        centerFar.add(this.camera.getPosition());
+        let toFar = vec3.create();
+        vec3.copy(toFar, forwardVector);
+        vec3.scale(toFar, toFar, this.SHADOW_DISTANCE);
 
-        let centerNear = new Vec3(forwardVector.x, forwardVector.y, forwardVector.z);
-        centerNear.scale(this.NEAR_PLANE);
-        centerNear.add(this.camera.getPosition());
+        let toNear = vec3.create();
+        vec3.copy(toFar, forwardVector);
+        vec3.scale(toNear, toNear, this.NEAR_PLANE);
+
+        let centerNear = vec3.create();
+        vec3.add(centerNear, toNear, this.camera.getPosition(), null);
+        let centerFar = vec3.create()
+        vec3.add(centerFar, toFar, this.camera.getPosition());
  
         let points = this.calculateFrustumVertices(rotation, forwardVector, centerNear,centerFar);
  
@@ -64,11 +73,14 @@ class ShadowBox {
         let x = (this.minX + this.maxX) / 2;
         let y = (this.minY + this.maxY) / 2;
         let z = (this.minZ + this.maxZ) / 2;
-        let cen = new Vec4(x, y, z, 1);
-        let invertedLight = new Mat4();
-        invertedLight.invert(this.lightViewMatrix);
-        invertedLight.transform(cen);
-        return new Vec3(invertedLight.x, invertedLight.y, invertedLight.z);
+
+        let center = vec3.new(x, y, z);
+
+        let invertedLight = mat4.create();
+        mat4.invert(invertedLight, this.lightViewMatrix);
+
+        vec3.transformMat4(center, center, invertedLight);
+        return center;
     }
 
     getWidth() {
@@ -84,27 +96,29 @@ class ShadowBox {
     }
 
     calculateFrustumVertices(rotation, forwardVector, centerNear, centerFar) {
-        let r = rotation.transform(this.UP);
-        let upVector = new Vec3(r.x, r.y, r.z);
+        let upVector = vec3.create();
+        vec3.transformMat4(upVector, this.UP, rotation);
 
-        let rightVector = forwardVector.cross(upVector);
+        let rightVector = vec3.create();
+        vec3.cross(rightVector, forwardVector, upVector);
 
-        let downVector = new Vec3(-upVector.x, -upVector.y, -upVector.z);
+        let downVector = vec3.create();
+        vec3.negate(downVector, upVector);
 
-        let leftVector = new Vec3(-rightVector.x, -rightVector.y, -rightVector.z);
+        let leftVector = vec3.create();
+        vec3.negate(leftVector, rightVector);
 
-        let topFar = centerFar;
-        let bottomFar = centerFar;
-        let topNear = centerNear;
-        let bottomNear = centerFar;
+        let farTop = vec3.create();
+        vec3.add(farTop, centerFar, vec3.new(upVector.x * this.farHeight, upVector.y * this.farHeight, upVector.z * this.farHeight));
 
-        let farTop = centerFar.add(new Vec3(upVector.x * this.farHeight, upVector.y * this.farHeight, upVector.z * this.farHeight));
+        let farBottom = vec3.create();
+        vec3.add(farBottom, centerFar, vec3.new(downVector.x * this.farHeight, downVector.y * this.farHeight, downVector.z * this.farHeight));
 
-        let farBottom = centerFar.add(new Vec3(downVector.x * this.farHeight, downVector.y * this.farHeight, downVector.z * this.farHeight));
+        let nearTop = vec3.create();
+        vec3.add(nearTop, centerFar, vec3.new(upVector.x * this.nearHeight, upVector.y * this.nearHeight, upVector.z * this.nearHeight));
 
-        let nearTop = centerNear.add(new Vec3(upVector.x * this.nearHeight, upVector.y * this.nearHeight, upVector.z * this.nearHeight));
-
-        let nearBottom = centerNear.add(new Vec3(downVector.x * this.nearHeight, downVector.y * this.nearHeight, downVector.z * this.nearHeight));
+        let nearBottom = vec3.create();
+        vec3.add(nearBottom, centerFar, vec3.new(downVector.x * this.nearHeight, downVector.y * this.nearHeight, downVector.z * this.nearHeight));
 
         let points = [];
 
@@ -121,24 +135,29 @@ class ShadowBox {
     }
 
     calculateCameraRotationMatrix() {
-        let rotation = new Mat4();
-        rotation.rotateY(Utils.toRad(-this.camera.getRotation().x));
-        rotation.rotateX(Utils.toRad(-this.camera.getRotation().y));
+        let rotation = mat4.create();
+        mat4.rotateY(rotation, rotation, this.camera.getYaw());
+        mat4.rotateX(rotation, rotation, this.camera.getPitch());
         return rotation;
     }
 
     calculateLightSpaceFrustumCorner(startPoint, direction, width) {
-        let point = startPoint.add(new Vec3(direction.x * width, direction.y * width, direction.z * width));
-        let point4 = new Vec4(point.x, point.y, point.z, 1);
-        point4 = this.lightViewMatrix.transform(point4);
-        return point4;
+        let point = vec3.new();
+        vec3.add(point, startPoint, vec3.new(direction.x * width, direction.y * width, direction.z * width));
+        
+        let point4 = vec4.new(point.x, point.y, point.z, 1);
+        vec4.transformMat4(point4, point4, this.lightViewMatrix);
+        return point4
     }
 
     calculateWidthsAndHeights() {
-        this.farWidth = this.SHADOW_DISTANCE * Math.tan(Math.toRadians(this.FOV));
-        this.nearWidth = this.NEAR_PLANE * Math.tan(Utils.toRad(this.FOV));
-        this.farHeight = farWidth / this.getAspectRatio();
-        this.nearHeight = nearWidth / this.getAspectRatio();
+        let FOVInRad = toRadian(this.FOV);
+        let aspectRatio = this.getAspectRatio();
+
+        this.farWidth = this.SHADOW_DISTANCE * Math.tan(FOVInRad);
+        this.nearWidth = this.NEAR_PLANE * Math.tan(FOVInRad);
+        this.farHeight = farWidth / aspectRatio;
+        this.nearHeight = nearWidth / aspectRatio;
     }
 
     getAspectRatio() {

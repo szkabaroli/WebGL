@@ -1,16 +1,18 @@
-import BasicShader from './basicShader';
 import Renderer from './renderer';
-import { vec3 } from 'vmath';
 import ShadowMapRenderer from './shadow/shadowMapRenderer';
+import GUIRenderer from './gui/guiRenderer';
 
 class MasterRenderer {
-    constructor(gl, camera, light) {
+    constructor(gl, camera, light, loader) {
         this.light = light;
         this.camera = camera;
-        this.shader = new BasicShader(gl);
-        this.renderer = new Renderer(gl, this.shader);
+
         this.entities = new Map();
-        //this.shadowMapRenderer = new ShadowMapRenderer(gl, camera);
+        this.guis = [];
+
+        this.shadowMapRenderer = new ShadowMapRenderer(gl, camera);
+        this.renderer = new Renderer(gl, camera, light);
+        this.guiRenderer = new GUIRenderer(gl, loader);
     }
 
     processEntity(entity) {
@@ -23,22 +25,24 @@ class MasterRenderer {
         }
     }
 
-    render() {
-        this.renderModels()
+    processGui(gui) {
+        this.guis.push(gui);
     }
 
-    renderModels() {
-        this.renderer.preRender();
-        this.shader.start();
+    getShadowMap() {
+        return this.shadowMapRenderer.getShadowMap();
+    }
 
-        this.shader.loadViewMatrix(this.camera);
-        this.shader.loadProjectionMatrix(90, 0.01, 1000);
-        this.shader.loadLight(this.light);
-        this.shader.loadFogColor(vec3.new(0.74,0.96,0.87));
-        
+    render() {
+        this.shadowMapRenderer.render(this.entities, this.light);
+
+        this.renderer.preRender();
         this.renderer.render(this.entities);
-        this.shader.stop();
+        
+        this.guiRenderer.render(this.guis);
+
         this.entities.clear();
+        this.guis = [];
     }
 }
 

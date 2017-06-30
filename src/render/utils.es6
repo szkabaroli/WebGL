@@ -14,6 +14,15 @@ export default class Utils {
         return matrix;
     }
 
+    static createModelMatrix2D(t,s) {
+        var matrix = mat4.create();
+        mat4.identity(matrix);
+        mat4.translate(matrix, matrix, vec3.new(t.x, t.y, 0));
+        mat4.scale(matrix, matrix, vec3.new(s.x, s.y, 0));
+        
+        return matrix;
+    }
+
     static createProjectionMatrix(FOV , NEAR_PLANE , FAR_PLANE ) {
         const aspectRatio = window.innerWidth / window.innerHeight;
         const yScale = (1 / Math.tan(toRadian(FOV / 2))) * aspectRatio;
