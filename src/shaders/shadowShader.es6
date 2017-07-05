@@ -1,12 +1,11 @@
 export const vertexShader = 
 `#version 300 es
 
-precision mediump float;
+precision highp float;
 
 in vec3 inPosition;
 uniform mat4 mvpMatrix;
-
-void main(void){
+void main(void){;
     gl_Position = mvpMatrix * vec4(inPosition, 1.0);
 } 
 `;
@@ -14,11 +13,10 @@ void main(void){
 export const fragmentShader = 
 `#version 300 es
 
-precision mediump float;
-
+precision highp float;
 out vec4 outColor;
 uniform sampler2D modelTexture;
 
-void main() {
+void main(void) {
     outColor = vec4(1.0);
 }`;

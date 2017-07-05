@@ -18,19 +18,20 @@ import {toRadian} from 'vmath'
         var gl = mDisplayManager.createDisplay('gl');
         //create loader and renderer
         const mLoader = new Loader(gl)
-        const mCamera = new Camera(vec3.new(0,0,0), vec3.new(0,0,0));
-        var mLight = new Light(vec3.new(-5,5,5), vec3.new(1,1,1));
+        const mCamera = new Camera(vec3.new(0,0,0), vec3.new(30,0,0));
+        var mLight = new Light(vec3.new(-50,50,50), vec3.new(1,1,1));
         const mRenderer = new MasterRenderer(gl, mCamera, mLight, mLoader);
 
-        var model = OBJLoader.loadOBJModel('res/test.obj');
+        var model = OBJLoader.loadOBJModel('res/tower01.obj');
         
         setTimeout(()=> {
 
 
-        var Model = mLoader.loadToVAO(model.v, model.t, model.n, model.i);
-        var Texture = mLoader.loadTexture('res/grid.png');
-        var Cube = new TexturedModel(Model, Texture);
-        var mEntity = new Entity(Cube, vec3.new(0,0,-2), vec3.new(0,0,0), 2);
+        var TowerModel = mLoader.loadToVAO(model.v, model.t, model.n, model.i);
+        var ElvishColors = mLoader.loadTexture('res/col.png');
+        var Tower = new TexturedModel(TowerModel, ElvishColors);
+
+        var eTower = new Entity(Tower, vec3.new(0,0,-2), vec3.new(0,90,0), 1);
 
         var code = 0;
         document.onkeydown = (e) => {
@@ -58,24 +59,20 @@ import {toRadian} from 'vmath'
             code = 0;
         }
         
-        //var t = mRenderer.getShadowMap();
-        //let p = new Texture(10);
-        
-        let mGui = new GUITexture(mLoader.loadT(mRenderer.getShadowMap()), vec2.new(0.5, 0.5), vec2.new(0.25, 0.25));
+        //let mGui = new GUITexture(mLoader.loadT(mRenderer.getShadowMap()), vec2.new(0.0, 0.5), vec2.new(0.5, 0.5));
 
         mDisplayManager.updateDisplay(() => {
 
             mCamera.move(code);
             mDisplayManager.resize();
             
-            //mEntity.increasePosition(vec3.new(0,0,0))
-            mEntity.increaseRotation(vec3.new(0,1,0));
+            //mEntity2.increasePosition(vec3.new(0,0,-0.01))
+            //mEntity.increaseRotation(vec3.new(0,1,0));
 
-            mRenderer.processEntity(mEntity);
-            mRenderer.processGui(mGui);
+            mRenderer.processEntity(eTower);
+
+            //mRenderer.processGui(mGui);
 
             mRenderer.render(mLight, mCamera);
         })
-        }, 100)
-        //mLoader.cleanUp();
-    
+    }, 1000)

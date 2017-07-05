@@ -34,15 +34,16 @@ class ShadowMapRenderer {
     }
 
     prepare(lightDirection,box) {
+        
         this.updateOrthoProjectionMatrix(box.getWidth(), box.getHeight(), box.getLength());
         this.updateLightViewMatrix(lightDirection, box.getCenter());
 
-        mat4.mul(this.projectionViewMatrix, this.projectionMatrix, this.lightViewMatrix);
+        mat4.multiply(this.projectionViewMatrix, this.projectionMatrix, this.lightViewMatrix);
 
         this.shadowFBO.bindFrameBuffer();
-        this.gl.clearColor(1, 0, 0, 1);
+        this.gl.clearColor(1, 0, 1, 1);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
-        this.shader.start();
+        //this.shader.start();
     }
 
     updateLightViewMatrix(direction, center) {

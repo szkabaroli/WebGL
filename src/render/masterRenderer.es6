@@ -34,12 +34,11 @@ class MasterRenderer {
     }
 
     render() {
-        this.shadowMapRenderer.render(this.entities, this.light);
-
+        //this.shadowMapRenderer.render(this.entities, this.light);
         this.renderer.preRender();
         this.renderer.render(this.entities);
         
-        this.guiRenderer.render(this.guis);
+       // this.guiRenderer.render(this.guis);
 
         this.entities.clear();
         this.guis = [];

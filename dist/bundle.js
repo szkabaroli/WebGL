@@ -7157,18 +7157,19 @@ var mDisplayManager = new _context2.default();
 var gl = mDisplayManager.createDisplay('gl');
 //create loader and renderer
 var mLoader = new _loader2.default(gl);
-var mCamera = new _camera2.default(_vmath.vec3.new(0, 0, 0), _vmath.vec3.new(0, 0, 0));
-var mLight = new _light2.default(_vmath.vec3.new(-5, 5, 5), _vmath.vec3.new(1, 1, 1));
+var mCamera = new _camera2.default(_vmath.vec3.new(0, 0, 0), _vmath.vec3.new(30, 0, 0));
+var mLight = new _light2.default(_vmath.vec3.new(-50, 50, 50), _vmath.vec3.new(1, 1, 1));
 var mRenderer = new _masterRenderer2.default(gl, mCamera, mLight, mLoader);
 
-var model = _OBJLoader2.default.loadOBJModel('res/test.obj');
+var model = _OBJLoader2.default.loadOBJModel('res/tower01.obj');
 
 setTimeout(function () {
 
-    var Model = mLoader.loadToVAO(model.v, model.t, model.n, model.i);
-    var Texture = mLoader.loadTexture('res/grid.png');
-    var Cube = new _texturedModel2.default(Model, Texture);
-    var mEntity = new _entity2.default(Cube, _vmath.vec3.new(0, 0, -2), _vmath.vec3.new(0, 0, 0), 2);
+    var TowerModel = mLoader.loadToVAO(model.v, model.t, model.n, model.i);
+    var ElvishColors = mLoader.loadTexture('res/col.png');
+    var Tower = new _texturedModel2.default(TowerModel, ElvishColors);
+
+    var eTower = new _entity2.default(Tower, _vmath.vec3.new(0, 0, -2), _vmath.vec3.new(0, 90, 0), 1);
 
     var code = 0;
     document.onkeydown = function (e) {
@@ -7196,26 +7197,23 @@ setTimeout(function () {
         code = 0;
     };
 
-    //var t = mRenderer.getShadowMap();
-    //let p = new Texture(10);
-
-    var mGui = new _guiTexture2.default(mLoader.loadT(mRenderer.getShadowMap()), _vmath.vec2.new(0.5, 0.5), _vmath.vec2.new(0.25, 0.25));
+    //let mGui = new GUITexture(mLoader.loadT(mRenderer.getShadowMap()), vec2.new(0.0, 0.5), vec2.new(0.5, 0.5));
 
     mDisplayManager.updateDisplay(function () {
 
         mCamera.move(code);
         mDisplayManager.resize();
 
-        //mEntity.increasePosition(vec3.new(0,0,0))
-        mEntity.increaseRotation(_vmath.vec3.new(0, 1, 0));
+        //mEntity2.increasePosition(vec3.new(0,0,-0.01))
+        //mEntity.increaseRotation(vec3.new(0,1,0));
 
-        mRenderer.processEntity(mEntity);
-        mRenderer.processGui(mGui);
+        mRenderer.processEntity(eTower);
+
+        //mRenderer.processGui(mGui);
 
         mRenderer.render(mLight, mCamera);
     });
-}, 100);
-//mLoader.cleanUp();
+}, 1000);
 
 },{"./render/OBJLoader":3,"./render/camera":5,"./render/context":6,"./render/entity":7,"./render/gui/guiTexture":10,"./render/light":11,"./render/loader":12,"./render/masterRenderer":13,"./render/model":14,"./render/texture":22,"./render/texturedModel":23,"vmath":1}],3:[function(require,module,exports){
 "use strict";
@@ -7512,9 +7510,10 @@ var DisplayManager = function () {
             this.canvas.width = window.innerWidth;
             this.canvas.height = window.innerHeight;
             this.gl = this.canvas.getContext('webgl2');
-            this.gl.enable(this.gl.DEPTH_TEST);
             this.gl.enable(this.gl.CULL_FACE);
+            this.gl.enable(this.gl.DEPTH_TEST);
             this.gl.depthFunc(this.gl.LEQUAL);
+            //this.gl.getExtension('OES_vertex_array_object')
             return this.gl;
         }
     }, {
@@ -7990,12 +7989,11 @@ var MasterRenderer = function () {
     }, {
         key: 'render',
         value: function render() {
-            this.shadowMapRenderer.render(this.entities, this.light);
-
+            //this.shadowMapRenderer.render(this.entities, this.light);
             this.renderer.preRender();
             this.renderer.render(this.entities);
 
-            this.guiRenderer.render(this.guis);
+            // this.guiRenderer.render(this.guis);
 
             this.entities.clear();
             this.guis = [];
@@ -8094,16 +8092,14 @@ var Renderer = function () {
             var _this = this;
 
             this.shader.start();
-
             this.shader.loadViewMatrix(this.camera);
-            this.shader.loadProjectionMatrix(90, 0.01, 1000);
+            this.shader.loadProjectionMatrix(50, 0.1, 100);
             this.shader.loadLight(this.light);
             this.shader.loadFogColor(_vmath.vec3.new(0.74, 0.96, 0.87));
 
             entitiesMap.forEach(function (entities, model) {
                 _this.prepareTexturedModel(model);
                 entities.forEach(function (entity) {
-
                     _this.shader.loadModelMatrix(entity);
 
                     _this.gl.drawElements(_this.gl.TRIANGLES, model.getModel().getVertexCount(), _this.gl.UNSIGNED_INT, 0);
@@ -8261,7 +8257,7 @@ var ShadowBox = function () {
         this.OFFSET = 10;
         this.UP = _vmath.vec3.create(0, 1, 0);
         this.FORWARD = _vmath.vec3.create(0, 0, -1);
-        this.SHADWO_DISTANCE = 200;
+        this.SHADOW_DISTANCE = 200;
         this.NEAR_PLANE = 0.001;
         this.FOV = 90;
         this.lightViewMatrix = lightViewMatrix;
@@ -8457,44 +8453,30 @@ var ShadowFrameBuffer = function () {
         this.gl = gl;
         this.WIDTH = width;
         this.HEIGHT = height;
-        this.fbo;
-        this.initFrameBuffer();
+        this.createFrameBuffer();
     }
 
     _createClass(ShadowFrameBuffer, [{
-        key: "initFrameBuffer",
-        value: function initFrameBuffer() {
-            this.fbo = this.createFrameBuffer();
-            this.shadowMap = this.createDepthBufferAttachment(this.WIDTH, this.HEIGHT);
-            this.unbindFrameBuffer();
-        }
-    }, {
         key: "createFrameBuffer",
         value: function createFrameBuffer() {
-            var fbo = this.gl.createFramebuffer();
-            this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, fbo);
-            return fbo;
-        }
-    }, {
-        key: "createDepthBufferAttachment",
-        value: function createDepthBufferAttachment(width, height) {
-            var renderBuffer = this.gl.createRenderbuffer();
-            this.gl.bindRenderbuffer(this.gl.RENDERBUFFER, renderBuffer);
+            this.frame_buffer = this.gl.createFramebuffer();
+            this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.frame_buffer);
+
+            var depth_render_buffer = this.gl.createRenderbuffer();
+            this.gl.bindRenderbuffer(this.gl.RENDERBUFFER, depth_render_buffer);
             this.gl.renderbufferStorage(this.gl.RENDERBUFFER, this.gl.DEPTH_COMPONENT16, this.WIDTH, this.HEIGHT);
+            this.gl.framebufferRenderbuffer(this.gl.FRAMEBUFFER, this.gl.DEPTH_ATTACHMENT, this.gl.RENDERBUFFER, depth_render_buffer);
 
-            this.gl.framebufferRenderbuffer(this.gl.FRAMEBUFFER, this.gl.DEPTH_ATTACHMENT, this.gl.RENDERBUFFER, renderBuffer);
-
-            var texture = this.gl.createTexture();
-            this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
+            this.frame_texture = this.gl.createTexture();
+            this.gl.bindTexture(this.gl.TEXTURE_2D, this.frame_texture);
+            this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.WIDTH, this.HEIGHT, 0, this.gl.RGBA, this.gl.UNSIGNED_BYTE, null);
             this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);
             this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
-            this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.WIDTH, this.HEIGHT, 0, this.gl.RGBA, this.gl.UNSIGNED_BYTE, null);
-
-            this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.gl.COLOR_ATTACHMENT0, this.gl.TEXTURE_2D, texture, 0);
+            this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.gl.COLOR_ATTACHMENT0, this.gl.TEXTURE_2D, this.frame_texture, 0);
 
             this.gl.bindTexture(this.gl.TEXTURE_2D, null);
+            this.gl.bindRenderbuffer(this.gl.RENDERBUFFER, null);
             this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
-            return texture;
         }
 
         //anather use//
@@ -8502,12 +8484,12 @@ var ShadowFrameBuffer = function () {
     }, {
         key: "getShadowMap",
         value: function getShadowMap() {
-            return this.shadowMap;
+            return this.frame_texture;
         }
     }, {
         key: "bindFrameBuffer",
         value: function bindFrameBuffer() {
-            this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.fbo);
+            this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.frame_buffer);
             this.gl.viewport(0, 0, this.WIDTH, this.HEIGHT);
         }
     }, {
@@ -8649,15 +8631,16 @@ var ShadowMapRenderer = function () {
     }, {
         key: 'prepare',
         value: function prepare(lightDirection, box) {
+
             this.updateOrthoProjectionMatrix(box.getWidth(), box.getHeight(), box.getLength());
             this.updateLightViewMatrix(lightDirection, box.getCenter());
 
-            _vmath.mat4.mul(this.projectionViewMatrix, this.projectionMatrix, this.lightViewMatrix);
+            _vmath.mat4.multiply(this.projectionViewMatrix, this.projectionMatrix, this.lightViewMatrix);
 
             this.shadowFBO.bindFrameBuffer();
-            this.gl.clearColor(1, 0, 0, 1);
+            this.gl.clearColor(1, 0, 1, 1);
             this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
-            this.shader.start();
+            //this.shader.start();
         }
     }, {
         key: 'updateLightViewMatrix',
@@ -8764,8 +8747,9 @@ var ShadowShader = function (_ShaderProgram) {
         key: 'loadMvpMatrix',
         value: function loadMvpMatrix(entity, projectionViewMatrix) {
             var modelMatrix = _utils2.default.createModelMatrix(entity.getPosition(), entity.getRotation(), entity.getScale());
+            var projectionMatrix = _utils2.default.createProjectionMatrix(40, 0.1, 100);
             var mvpMatrix = _vmath.mat4.create();
-            _vmath.mat4.multiply(mvpMatrix, projectionViewMatrix, modelMatrix);
+            _vmath.mat4.multiply(mvpMatrix, projectionMatrix, modelMatrix);
             _get(ShadowShader.prototype.__proto__ || Object.getPrototypeOf(ShadowShader.prototype), 'loadMatrix', this).call(this, this.mvpMatrixLocation, mvpMatrix);
         }
     }]);
@@ -8895,13 +8879,13 @@ var Utils = function () {
     }, {
         key: 'createProjectionMatrix',
         value: function createProjectionMatrix(FOV, NEAR_PLANE, FAR_PLANE) {
+            var matrix = _vmath.mat4.create();
             var aspectRatio = window.innerWidth / window.innerHeight;
-            var yScale = 1 / Math.tan((0, _vmath.toRadian)(FOV / 2)) * aspectRatio;
+            var yScale = 1 / Math.tan((0, _vmath.toRadian)(FOV / 2));
             var xScale = yScale / aspectRatio;
             var frustumLength = FAR_PLANE - NEAR_PLANE;
 
-            var matrix = _vmath.mat4.create();
-            _vmath.mat4.set(matrix, xScale, 0, 0, 0, 0, yScale, 0, 0, 0, 0, -((FAR_PLANE + NEAR_PLANE) / frustumLength), -1, 0, 0, -(2 * NEAR_PLANE * FAR_PLANE) / frustumLength, 0);
+            _vmath.mat4.set(matrix, xScale, 0, 0, 0, 0, yScale, 0, 0, 0, 0, -((FAR_PLANE + NEAR_PLANE) / frustumLength), -1, 0, 0, -(2 * NEAR_PLANE * FAR_PLANE / frustumLength), 0);
             return matrix;
         }
     }, {
@@ -8929,9 +8913,9 @@ exports.default = Utils;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-var vertexShader = exports.vertexShader = "#version 300 es\n\nprecision mediump float;\n\nin vec3 position;\nin vec2 textureCoords;\nin vec3 normals;\n\n\nuniform mat4 modelMatrix;\nuniform mat4 projectionMatrix;\nuniform mat4 viewMatrix;\nuniform vec3 lightPosition;\n\nout vec2 passedTextureCoords;\nout vec3 surfaceNormal;\nout vec3 toLightVector;\nout float visiblity;\n\nconst float density = 0.05;\nconst float gradient =5.0;\n\n\nvoid main(){\n    vec4 worldPosition = modelMatrix * vec4(position, 1.0);\n    vec4 positionRelativeToCam = viewMatrix * worldPosition;\n    gl_Position = projectionMatrix * positionRelativeToCam;\n    passedTextureCoords = textureCoords;\n\n    surfaceNormal = (modelMatrix * vec4(normals, 0.0)).xyz;\n    toLightVector = lightPosition - worldPosition.xyz;\n\n    float distance = length(positionRelativeToCam.xyz);\n    visiblity = exp(-pow((distance*density), gradient));\n    visiblity = clamp(visiblity, 0.0f, 1.0);\n} \n";
+var vertexShader = exports.vertexShader = "#version 300 es\n\nprecision mediump float;\n\nin vec3 position;\nin vec2 textureCoords;\nin vec3 normals;\n\n\nuniform mat4 modelMatrix;\nuniform mat4 projectionMatrix;\nuniform mat4 viewMatrix;\nuniform vec3 lightPosition;\n\nout vec2 passedTextureCoords;\nout vec3 surfaceNormal;\nout vec3 toLightVector;\nout float visiblity;\n\nconst float density = 0.05;\nconst float gradient =5.0;\n\nvoid main(void){\n    vec4 worldPosition = modelMatrix * vec4(position, 1.0);\n    vec4 positionRelativeToCam = viewMatrix * worldPosition;\n    gl_Position = projectionMatrix * positionRelativeToCam;\n    passedTextureCoords = textureCoords;\n\n    surfaceNormal = (modelMatrix * vec4(normals, 0.0)).xyz;\n    toLightVector = lightPosition - worldPosition.xyz;\n\n    float distance = length(positionRelativeToCam.xyz);\n    visiblity = exp(-pow((distance*density), gradient));\n    visiblity = clamp(visiblity, 0.0, 1.0);\n} \n";
 
-var fragmentShader = exports.fragmentShader = "#version 300 es\n\nprecision mediump float;\n\nin vec2 passedTextureCoords;\nin vec3 surfaceNormal;\nin vec3 toLightVector;\nin float visiblity;\n\nuniform sampler2D textureSampler;\nuniform vec3 lightColor;\nuniform vec3 fogColor;\n\nout vec4 out_Color;\n\nvoid main() {\n    vec3 unitNormal = normalize(surfaceNormal);\n    vec3 unitLightVector = normalize(toLightVector);\n    float nDotl = dot(unitNormal, unitLightVector);\n    float brightness = max(nDotl, 0.2);\n    vec3 diffuse = brightness * lightColor;\n    out_Color = vec4(diffuse, 1.0) * texture(textureSampler, passedTextureCoords);\n    out_Color = mix(vec4(fogColor, 1.0), out_Color, visiblity);\n}";
+var fragmentShader = exports.fragmentShader = "#version 300 es\n\nprecision mediump float;\n\nin vec2 passedTextureCoords;\nin vec3 surfaceNormal;\nin vec3 toLightVector;\nin float visiblity;\n\nuniform sampler2D textureSampler;\nuniform vec3 lightColor;\nuniform vec3 fogColor;\n\nout vec4 out_Color;\n\nvoid main() {\n    vec3 unitNormal = normalize(surfaceNormal);\n    vec3 unitLightVector = normalize(toLightVector);\n    float nDotl = dot(unitNormal, unitLightVector);\n    float brightness = max(nDotl, 0.4);\n    vec3 diffuse = brightness * lightColor;\n    out_Color = vec4(diffuse, 1.0) * texture(textureSampler, passedTextureCoords);\n    out_Color = mix(vec4(fogColor, 1.0), out_Color, visiblity);\n}";
 
 },{}],26:[function(require,module,exports){
 "use strict";
@@ -8949,8 +8933,8 @@ var fragmentShader = exports.fragmentShader = "#version 300 es\n\nprecision medi
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-var vertexShader = exports.vertexShader = "#version 300 es\n\nprecision mediump float;\n\nin vec3 inPosition;\nuniform mat4 mvpMatrix;\n\nvoid main(void){\n    gl_Position = mvpMatrix * vec4(inPosition, 1.0);\n} \n";
+var vertexShader = exports.vertexShader = "#version 300 es\n\nprecision highp float;\n\nin vec3 inPosition;\nuniform mat4 mvpMatrix;\nvoid main(void){;\n    gl_Position = mvpMatrix * vec4(inPosition, 1.0);\n} \n";
 
-var fragmentShader = exports.fragmentShader = "#version 300 es\n\nprecision mediump float;\n\nout vec4 outColor;\nuniform sampler2D modelTexture;\n\nvoid main() {\n    outColor = vec4(1.0);\n}";
+var fragmentShader = exports.fragmentShader = "#version 300 es\n\nprecision highp float;\nout vec4 outColor;\nuniform sampler2D modelTexture;\n\nvoid main(void) {\n    outColor = vec4(1.0);\n}";
 
 },{}]},{},[2]);

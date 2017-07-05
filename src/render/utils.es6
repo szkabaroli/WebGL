@@ -24,12 +24,12 @@ export default class Utils {
     }
 
     static createProjectionMatrix(FOV , NEAR_PLANE , FAR_PLANE ) {
+        let matrix = mat4.create();
         const aspectRatio = window.innerWidth / window.innerHeight;
-        const yScale = (1 / Math.tan(toRadian(FOV / 2))) * aspectRatio;
+        const yScale = (1 / Math.tan(toRadian(FOV / 2)))
         const xScale = yScale / aspectRatio;
         const frustumLength = FAR_PLANE - NEAR_PLANE;
 
-        let matrix = mat4.create();
         mat4.set(matrix, 
         xScale,
         0,
@@ -45,7 +45,7 @@ export default class Utils {
         -1,
         0,
         0,
-        -(2 * NEAR_PLANE * FAR_PLANE) / frustumLength,
+        -((2 * NEAR_PLANE * FAR_PLANE) / frustumLength),
         0
         )
         return matrix;

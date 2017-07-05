@@ -21,16 +21,14 @@ export default class Renderer {
 
     render(entitiesMap) {
         this.shader.start();
-
         this.shader.loadViewMatrix(this.camera);
-        this.shader.loadProjectionMatrix(90, 0.01, 1000);
+        this.shader.loadProjectionMatrix(50, 0.1, 100);
         this.shader.loadLight(this.light);
         this.shader.loadFogColor(vec3.new(0.74,0.96,0.87));
 
         entitiesMap.forEach((entities, model)=>{
             this.prepareTexturedModel(model);
             entities.forEach((entity)=>{
-
                 this.shader.loadModelMatrix(entity);
 
                 this.gl.drawElements(this.gl.TRIANGLES, model.getModel().getVertexCount(), this.gl.UNSIGNED_INT, 0);

@@ -8,9 +8,10 @@ class DisplayManager {
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
         this.gl = this.canvas.getContext('webgl2');
-        this.gl.enable(this.gl.DEPTH_TEST);
         this.gl.enable(this.gl.CULL_FACE);
+        this.gl.enable(this.gl.DEPTH_TEST);
         this.gl.depthFunc(this.gl.LEQUAL);
+        //this.gl.getExtension('OES_vertex_array_object')
         return this.gl;
     }
 

@@ -18,8 +18,9 @@ class ShadowShader extends ShaderProgram {
 
     loadMvpMatrix(entity, projectionViewMatrix) {
         const modelMatrix = Utils.createModelMatrix(entity.getPosition(), entity.getRotation(), entity.getScale());
+        const projectionMatrix = Utils.createProjectionMatrix(40, 0.1, 100);
         const mvpMatrix = mat4.create();
-        mat4.multiply(mvpMatrix, projectionViewMatrix, modelMatrix);
+        mat4.multiply(mvpMatrix, projectionMatrix, modelMatrix);
         super.loadMatrix(this.mvpMatrixLocation, mvpMatrix);
     }
 }

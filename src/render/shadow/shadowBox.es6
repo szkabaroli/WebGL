@@ -5,7 +5,7 @@ class ShadowBox {
         this.OFFSET = 10;
         this.UP = vec3.create(0,1,0);
         this.FORWARD = vec3.create(0,0,-1);
-        this.SHADWO_DISTANCE = 200;
+        this.SHADOW_DISTANCE = 200;
         this.NEAR_PLANE = 0.001;
         this.FOV = 90;
         this.lightViewMatrix = lightViewMatrix;
