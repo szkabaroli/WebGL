@@ -1,0 +1,15 @@
+{
+    "name": "temarina",
+    "entities": [{
+            "model": "res/tower01.obj",
+            "texture": "res/textures/col.png",
+            "tx": 0,
+            "ty": 0,
+            "tz": 0,
+            "rx": 0,
+            "ry": 0,
+            "rz": 0,
+            "s": 0
+        }
+    ]
+}

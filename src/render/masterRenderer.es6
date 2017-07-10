@@ -40,7 +40,7 @@ class MasterRenderer {
         
        // this.guiRenderer.render(this.guis);
 
-        this.entities.clear();
+        //this.entities.clear();
         this.guis = [];
     }
 }

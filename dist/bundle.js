@@ -7146,32 +7146,34 @@ var _light = require('./render/light');
 
 var _light2 = _interopRequireDefault(_light);
 
-var _masterRenderer = require('./render/masterRenderer');
+var _sceneManager = require('./render/sceneManager');
 
-var _masterRenderer2 = _interopRequireDefault(_masterRenderer);
+var _sceneManager2 = _interopRequireDefault(_sceneManager);
+
+var _scene = require('./render/scene');
+
+var _scene2 = _interopRequireDefault(_scene);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 //create display
 var mDisplayManager = new _context2.default();
 var gl = mDisplayManager.createDisplay('gl');
-//create loader and renderer
+
 var mLoader = new _loader2.default(gl);
 var mCamera = new _camera2.default(_vmath.vec3.new(0, 0, 0), _vmath.vec3.new(30, 0, 0));
 var mLight = new _light2.default(_vmath.vec3.new(-50, 50, 50), _vmath.vec3.new(1, 1, 1));
-var mRenderer = new _masterRenderer2.default(gl, mCamera, mLight, mLoader);
+_OBJLoader2.default.loadOBJModel(mLoader, 'res/tower01.obj').then(function (TowerModel) {
+    var mSceneManager = new _sceneManager2.default(gl, mLoader);
 
-var model = _OBJLoader2.default.loadOBJModel('res/tower01.obj');
-
-setTimeout(function () {
-
-    var TowerModel = mLoader.loadToVAO(model.v, model.t, model.n, model.i);
     var ElvishColors = mLoader.loadTexture('res/col.png');
     var Tower = new _texturedModel2.default(TowerModel, ElvishColors);
 
     var eTower = new _entity2.default(Tower, _vmath.vec3.new(0, 0, -2), _vmath.vec3.new(0, 90, 0), 1);
+    mSceneManager.load(new _scene2.default([eTower], mLight, mCamera));
 
     var code = 0;
+
     document.onkeydown = function (e) {
         if (e.keyCode == 87) {
             code = 87;
@@ -7197,38 +7199,23 @@ setTimeout(function () {
         code = 0;
     };
 
-    //let mGui = new GUITexture(mLoader.loadT(mRenderer.getShadowMap()), vec2.new(0.0, 0.5), vec2.new(0.5, 0.5));
-
     mDisplayManager.updateDisplay(function () {
-
         mCamera.move(code);
         mDisplayManager.resize();
-
-        //mEntity2.increasePosition(vec3.new(0,0,-0.01))
-        //mEntity.increaseRotation(vec3.new(0,1,0));
-
-        mRenderer.processEntity(eTower);
-
-        //mRenderer.processGui(mGui);
-
-        mRenderer.render(mLight, mCamera);
+        mSceneManager.render();
     });
-}, 1000);
+}, function (err) {
+    console.log(err);
+});
 
-},{"./render/OBJLoader":3,"./render/camera":5,"./render/context":6,"./render/entity":7,"./render/gui/guiTexture":10,"./render/light":11,"./render/loader":12,"./render/masterRenderer":13,"./render/model":14,"./render/texture":22,"./render/texturedModel":23,"vmath":1}],3:[function(require,module,exports){
-"use strict";
+},{"./render/OBJLoader":3,"./render/camera":5,"./render/context":6,"./render/entity":7,"./render/gui/guiTexture":10,"./render/light":11,"./render/loader":12,"./render/model":14,"./render/scene":16,"./render/sceneManager":17,"./render/texture":24,"./render/texturedModel":25,"vmath":1}],3:[function(require,module,exports){
+'use strict';
 
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _loader = require("./loader");
-
-var _loader2 = _interopRequireDefault(_loader);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -7238,8 +7225,26 @@ var OBJLoader = function () {
     }
 
     _createClass(OBJLoader, null, [{
-        key: "loadOBJModel",
-        value: function loadOBJModel(fileName) {
+        key: 'loadOBJModel',
+        value: function loadOBJModel(loader, fileName) {
+            var _this = this;
+
+            //load file via ajax
+            return new Promise(function (resolve, reject) {
+                var xhr = new XMLHttpRequest();
+                xhr.open("GET", fileName);
+                xhr.onload = function () {
+                    return resolve(_this.onLoad(loader, xhr.responseText));
+                };
+                xhr.onerror = function () {
+                    return reject(xhr.statusText);
+                };
+                xhr.send();
+            });
+        }
+    }, {
+        key: 'onLoad',
+        value: function onLoad(loader, text) {
             var cVertices = [];
             var cTextures = [];
             var cNormals = [];
@@ -7253,56 +7258,47 @@ var OBJLoader = function () {
             var fNormals = [];
             var fVertices = [];
 
-            //load file via ajax
-            var xhr = new XMLHttpRequest();
-            xhr.addEventListener("load", onLoad);
-            xhr.open("GET", fileName);
-            xhr.send();
+            var lines = text.split('\n');
 
-            function onLoad() {
+            lines.forEach(function (line) {
 
-                var lines = this.responseText.split('\n');
+                var currentLine = line.split(' ');
 
-                lines.forEach(function (line) {
+                switch (currentLine[0]) {
+                    case 'v':
+                        cVertices.push(parseFloat(currentLine[1]), parseFloat(currentLine[2]), parseFloat(currentLine[3]));
+                        break;
+                    case 'vt':
+                        cTextures.push(parseFloat(currentLine[1]), parseFloat(currentLine[2]));
+                        break;
+                    case 'vn':
+                        cNormals.push(parseFloat(currentLine[1]), parseFloat(currentLine[2]), parseFloat(currentLine[3]));
+                        break;
+                    case 'f':
 
-                    var currentLine = line.split(' ');
-                    switch (currentLine[0]) {
-                        case 'v':
-                            cVertices.push(parseFloat(currentLine[1]), parseFloat(currentLine[2]), parseFloat(currentLine[3]));
-                            break;
-                        case 'vt':
-                            cTextures.push(parseFloat(currentLine[1]), parseFloat(currentLine[2]));
-                            break;
-                        case 'vn':
-                            cNormals.push(parseFloat(currentLine[1]), parseFloat(currentLine[2]), parseFloat(currentLine[3]));
-                            break;
-                        case 'f':
+                        for (var i = 1; i < currentLine.length; i++) {
+                            if (currentLine[i] in aCache) {
+                                fIndicies.push(aCache[currentLine[i]]); //it has, add its index to the list.
+                            } else {
+                                var vtn = currentLine[i].split('/');
+                                var ind = (parseInt(vtn[0]) - 1) * 3;
+                                fVertices.push(cVertices[ind], cVertices[ind + 1], cVertices[ind + 2]);
 
-                            for (var i = 1; i < currentLine.length; i++) {
-                                if (currentLine[i] in aCache) {
-                                    fIndicies.push(aCache[currentLine[i]]); //it has, add its index to the list.
-                                } else {
-                                    var vtn = currentLine[i].split('/');
-                                    var ind = (parseInt(vtn[0]) - 1) * 3;
-                                    fVertices.push(cVertices[ind], cVertices[ind + 1], cVertices[ind + 2]);
+                                ind = (parseInt(vtn[1]) - 1) * 2;
+                                fTextures.push(cTextures[ind], cTextures[ind + 1]);
 
-                                    ind = (parseInt(vtn[1]) - 1) * 2;
-                                    fTextures.push(cTextures[ind], cTextures[ind + 1]);
+                                ind = (parseInt(vtn[2]) - 1) * 3;
+                                fNormals.push(cNormals[ind], cNormals[ind + 1], cNormals[ind + 2]);
 
-                                    ind = (parseInt(vtn[2]) - 1) * 3;
-                                    fNormals.push(cNormals[ind], cNormals[ind + 1], cNormals[ind + 2]);
-
-                                    aCache[currentLine[i]] = fIndexCnt;
-                                    fIndicies.push(fIndexCnt);
-                                    fIndexCnt++;
-                                }
+                                aCache[currentLine[i]] = fIndexCnt;
+                                fIndicies.push(fIndexCnt);
+                                fIndexCnt++;
                             }
-                            break;
-
-                    }
-                });
-            }
-            return { v: fVertices, t: fTextures, n: fNormals, i: fIndicies };
+                        }
+                        break;
+                }
+            });
+            return loader.loadToVAO(fVertices, fTextures, fNormals, fIndicies);
         }
     }]);
 
@@ -7311,7 +7307,7 @@ var OBJLoader = function () {
 
 exports.default = OBJLoader;
 
-},{"./loader":12}],4:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -7406,7 +7402,7 @@ var BasicShader = function (_ShaderProgram) {
 
 exports.default = BasicShader;
 
-},{"../shaders/basicShader":25,"./camera":5,"./shaderProgram":16,"./utils":24}],5:[function(require,module,exports){
+},{"../shaders/basicShader":27,"./camera":5,"./shaderProgram":18,"./utils":26}],5:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7545,7 +7541,7 @@ var DisplayManager = function () {
 
 exports.default = DisplayManager;
 
-},{"../shaders/basicShader":25}],7:[function(require,module,exports){
+},{"../shaders/basicShader":27}],7:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -7613,7 +7609,7 @@ var Entity = function () {
 
 exports.default = Entity;
 
-},{"./texturedModel":23}],8:[function(require,module,exports){
+},{"./texturedModel":25}],8:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -7684,7 +7680,7 @@ var GUIRenderer = function () {
 
 exports.default = GUIRenderer;
 
-},{"../utils":24,"./guiShader":9}],9:[function(require,module,exports){
+},{"../utils":26,"./guiShader":9}],9:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -7740,7 +7736,7 @@ var GUIShader = function (_ShaderProgram) {
 
 exports.default = GUIShader;
 
-},{"../../shaders/guiShader":26,"../shaderProgram":16}],10:[function(require,module,exports){
+},{"../../shaders/guiShader":28,"../shaderProgram":18}],10:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7925,7 +7921,7 @@ var Loader = function () {
 
 exports.default = Loader;
 
-},{"./model":14,"./texture":22}],13:[function(require,module,exports){
+},{"./model":14,"./texture":24}],13:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -7995,7 +7991,7 @@ var MasterRenderer = function () {
 
             // this.guiRenderer.render(this.guis);
 
-            this.entities.clear();
+            //this.entities.clear();
             this.guis = [];
         }
     }]);
@@ -8005,7 +8001,7 @@ var MasterRenderer = function () {
 
 exports.default = MasterRenderer;
 
-},{"./gui/guiRenderer":8,"./renderer":15,"./shadow/shadowMapRenderer":20}],14:[function(require,module,exports){
+},{"./gui/guiRenderer":8,"./renderer":15,"./shadow/shadowMapRenderer":22}],14:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8135,7 +8131,86 @@ var Renderer = function () {
 
 exports.default = Renderer;
 
-},{"./basicshader":4,"./entity":7,"./texturedModel":23,"vmath":1}],16:[function(require,module,exports){
+},{"./basicshader":4,"./entity":7,"./texturedModel":25,"vmath":1}],16:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Scene = function Scene(entities, light, camera) {
+    _classCallCheck(this, Scene);
+
+    this.entities = entities;
+    this.light = light;
+    this.camera = camera;
+};
+
+exports.default = Scene;
+
+},{}],17:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _masterRenderer = require('./masterRenderer');
+
+var _masterRenderer2 = _interopRequireDefault(_masterRenderer);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var SceneManager = function () {
+    function SceneManager(gl, loader) {
+        _classCallCheck(this, SceneManager);
+
+        this.gl = gl;
+        this.loader = loader;
+    }
+
+    _createClass(SceneManager, [{
+        key: 'load',
+        value: function load(scene) {
+            var _this = this;
+
+            this.scene = scene;
+            this.sceneLight = scene.light;
+            this.sceneCamera = scene.camera;
+            this.renderer = new _masterRenderer2.default(this.gl, this.sceneCamera, this.sceneLight, this.loader);
+            scene.entities.forEach(function (entity) {
+                _this.renderer.processEntity(entity);
+            });
+        }
+    }, {
+        key: 'unloadScene',
+        value: function unloadScene() {
+            delete this.scene;
+            delete this.sceneCamera;
+            delete this.sceneLight;
+            delete this.renderer;
+        }
+    }, {
+        key: 'render',
+        value: function render() {
+            if (this.scene != undefined) {
+                this.renderer.render();
+            }
+        }
+    }]);
+
+    return SceneManager;
+}();
+
+exports.default = SceneManager;
+
+},{"./masterRenderer":13}],18:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -8237,7 +8312,7 @@ var ShaderProgram = function () {
 
 exports.default = ShaderProgram;
 
-},{"../shaders/basicShader":25,"vmath":1}],17:[function(require,module,exports){
+},{"../shaders/basicShader":27,"vmath":1}],19:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -8435,7 +8510,7 @@ var ShadowBox = function () {
 
 exports.default = ShadowBox;
 
-},{"vmath":1}],18:[function(require,module,exports){
+},{"vmath":1}],20:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8505,7 +8580,7 @@ var ShadowFrameBuffer = function () {
 
 exports.default = ShadowFrameBuffer;
 
-},{}],19:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8563,7 +8638,7 @@ var ShadowMapEntityRenderer = function () {
 
 exports.default = ShadowMapEntityRenderer;
 
-},{}],20:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -8693,7 +8768,7 @@ var ShadowMapRenderer = function () {
 
 exports.default = ShadowMapRenderer;
 
-},{"./shadowBox":17,"./shadowFrameBuffer":18,"./shadowMapEntityRenderer":19,"./shadowShader":21,"vmath":1}],21:[function(require,module,exports){
+},{"./shadowBox":19,"./shadowFrameBuffer":20,"./shadowMapEntityRenderer":21,"./shadowShader":23,"vmath":1}],23:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -8759,7 +8834,7 @@ var ShadowShader = function (_ShaderProgram) {
 
 exports.default = ShadowShader;
 
-},{"../../shaders/shadowShader":27,"../shaderProgram":16,"../utils":24,"vmath":1}],22:[function(require,module,exports){
+},{"../../shaders/shadowShader":29,"../shaderProgram":18,"../utils":26,"vmath":1}],24:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8789,7 +8864,7 @@ var Texture = function () {
 
 exports.default = Texture;
 
-},{}],23:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -8835,7 +8910,7 @@ var TexturedModel = function () {
 
 exports.default = TexturedModel;
 
-},{"./model":14,"./texture":22}],24:[function(require,module,exports){
+},{"./model":14,"./texture":24}],26:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -8907,7 +8982,7 @@ var Utils = function () {
 
 exports.default = Utils;
 
-},{"vmath":1}],25:[function(require,module,exports){
+},{"vmath":1}],27:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8917,7 +8992,7 @@ var vertexShader = exports.vertexShader = "#version 300 es\n\nprecision mediump 
 
 var fragmentShader = exports.fragmentShader = "#version 300 es\n\nprecision mediump float;\n\nin vec2 passedTextureCoords;\nin vec3 surfaceNormal;\nin vec3 toLightVector;\nin float visiblity;\n\nuniform sampler2D textureSampler;\nuniform vec3 lightColor;\nuniform vec3 fogColor;\n\nout vec4 out_Color;\n\nvoid main() {\n    vec3 unitNormal = normalize(surfaceNormal);\n    vec3 unitLightVector = normalize(toLightVector);\n    float nDotl = dot(unitNormal, unitLightVector);\n    float brightness = max(nDotl, 0.4);\n    vec3 diffuse = brightness * lightColor;\n    out_Color = vec4(diffuse, 1.0) * texture(textureSampler, passedTextureCoords);\n    out_Color = mix(vec4(fogColor, 1.0), out_Color, visiblity);\n}";
 
-},{}],26:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8927,7 +9002,7 @@ var vertexShader = exports.vertexShader = "#version 300 es\n\nprecision mediump 
 
 var fragmentShader = exports.fragmentShader = "#version 300 es\n\nprecision mediump float;\n\nin vec2 textureCoords;\n\nout vec4 out_Color;\n\nuniform sampler2D guiTexture;\n\nvoid main(void){\n\n\tout_Color = texture(guiTexture,textureCoords);\n\n}";
 
-},{}],27:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
