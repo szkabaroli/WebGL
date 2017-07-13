@@ -23,9 +23,9 @@ export default class Utils {
         return matrix;
     }
 
-    static createProjectionMatrix(FOV , NEAR_PLANE , FAR_PLANE ) {
+    static createProjectionMatrix(gl, FOV , NEAR_PLANE , FAR_PLANE ) {
         let matrix = mat4.create();
-        const aspectRatio = window.innerWidth / window.innerHeight;
+        const aspectRatio = gl.canvas.width / gl.canvas.height;
         const yScale = (1 / Math.tan(toRadian(FOV / 2)))
         const xScale = yScale / aspectRatio;
         const frustumLength = FAR_PLANE - NEAR_PLANE;

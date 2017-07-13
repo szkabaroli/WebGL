@@ -5,13 +5,12 @@ class DisplayManager {
     createDisplay(canvasId) {
         
         this.canvas = document.getElementById(canvasId);
-        this.canvas.width = window.innerWidth;
-        this.canvas.height = window.innerHeight;
         this.gl = this.canvas.getContext('webgl2');
+        this.canvas.width = this.canvas.clientWidth;
+        this.canvas.height = this.canvas.clientHeight;
         this.gl.enable(this.gl.CULL_FACE);
         this.gl.enable(this.gl.DEPTH_TEST);
         this.gl.depthFunc(this.gl.LEQUAL);
-        //this.gl.getExtension('OES_vertex_array_object')
         return this.gl;
     }
 
@@ -25,15 +24,8 @@ class DisplayManager {
     }
 
     resize() {
-        var displayWidth  = window.innerWidth;
-        var displayHeight = window.innerHeight;
- 
-        if (this.canvas.width  != displayWidth ||
-            this.canvas.height != displayHeight) {
- 
-        this.canvas.width  = displayWidth;
-        this.canvas.height = displayHeight;
-  }
+        this.canvas.width = this.canvas.clientWidth;
+        this.canvas.height = this.canvas.clientHeight;
     }
 }
 

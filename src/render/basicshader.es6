@@ -39,7 +39,7 @@ class BasicShader extends ShaderProgram{
     }
 
     loadProjectionMatrix(FOV, NEAR_PLANE, FAR_PLANE) {
-        const projectionMatrix = Utils.createProjectionMatrix(FOV, NEAR_PLANE, FAR_PLANE);
+        const projectionMatrix = Utils.createProjectionMatrix(this.gl, FOV, NEAR_PLANE, FAR_PLANE);
         super.loadMatrix(this.projectionMatrixLoc, projectionMatrix);
     }
     loadViewMatrix(camera) {

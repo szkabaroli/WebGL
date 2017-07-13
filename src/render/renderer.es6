@@ -14,17 +14,17 @@ export default class Renderer {
     }
 
     preRender() {
-        this.gl.viewport(0,0,window.innerWidth, window.innerHeight)
-        this.gl.clearColor(0.59, 0.84, 0.85, 255);
+        this.gl.viewport(0,0,this.gl.canvas.width, this.gl.canvas.height);
+        this.gl.clearColor(0.56, 0.64, 0.68, 255);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
     }
 
     render(entitiesMap) {
         this.shader.start();
         this.shader.loadViewMatrix(this.camera);
-        this.shader.loadProjectionMatrix(50, 0.1, 100);
+        this.shader.loadProjectionMatrix(70, 0.1, 100);
         this.shader.loadLight(this.light);
-        this.shader.loadFogColor(vec3.new(0.74,0.96,0.87));
+        this.shader.loadFogColor(vec3.new(0.0,0.0,0.0));
 
         entitiesMap.forEach((entities, model)=>{
             this.prepareTexturedModel(model);

@@ -56,7 +56,7 @@ void main() {
     vec3 unitNormal = normalize(surfaceNormal);
     vec3 unitLightVector = normalize(toLightVector);
     float nDotl = dot(unitNormal, unitLightVector);
-    float brightness = max(nDotl, 0.4);
+    float brightness = max(nDotl, 0.1);
     vec3 diffuse = brightness * lightColor;
     out_Color = vec4(diffuse, 1.0) * texture(textureSampler, passedTextureCoords);
     out_Color = mix(vec4(fogColor, 1.0), out_Color, visiblity);

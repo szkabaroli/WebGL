@@ -1,73 +1,41 @@
-import DisplayManager from './render/context';
-import Model from './render/model';
-import Loader from './render/loader';
-import TexturedModel from './render/texturedModel';
-import GUITexture from './render/gui/guiTexture';
-import Texture from './render/texture';
-import Entity from './render/entity';
-import {
-    vec3,
-    vec2
-} from 'vmath';
-import Camera from './render/camera';
-import OBJLoader from './render/OBJLoader';
-import Light from './render/light';
-import SceneManager from './render/sceneManager';
-import Scene from './render/scene';
-import {
-    toRadian
-} from 'vmath';
+import $ from 'jquery';
+import ModelViewer from './modelViewer';
 
+$(document).ready(()=>{
 
-//create display
-const mDisplayManager = new DisplayManager();
-var gl = mDisplayManager.createDisplay('gl');
+/*$(document).on('click','a', (e)=>{
+    e.preventDefault();
+    let pageHref = $(e.currentTarget).attr('href');
+    getPage(pageHref);
+})*/
 
-const mLoader = new Loader(gl)
-const mCamera = new Camera(vec3.new(0, 0, 0), vec3.new(30, 0, 0));
-const mLight = new Light(vec3.new(-50, 50, 50), vec3.new(1, 1, 1));
-OBJLoader.loadOBJModel(mLoader, 'res/tower01.obj').then((TowerModel) => {
-    const mSceneManager = new SceneManager(gl, mLoader);
+pageFunctions(window.location.pathname);
 
+function pageFunctions(pageName){
+    console.log(pageName);
+    if(pageName == '/') {
+        $.get('card.html', (cardTemplate) => {
+            $.get('/api/models', (cardsData) => {
+                cardsData.forEach((cardData) => {
+                    let card = cardTemplate;
+                    card = card.replace('{{img}}', cardData.img);
+                    card = card.replace('{{modelName}}', cardData.name);
+                    card = card.replace('{{link}}', cardData.link);
+                    var cardC = $('#cards').append(card);
+                });
+            });
+        });
+    } else if(pageName.indexOf('view') !== -1) {
+        var model = window.location.href.split('?')[1].split('&')[0].split('=')[1];
+        var texture = window.location.href.split('?')[1].split('&')[1].split('=')[1];
+        console.log(model);
+        console.log(texture);
 
-    var ElvishColors = mLoader.loadTexture('res/col.png');
-    var Tower = new TexturedModel(TowerModel, ElvishColors);
-
-    var eTower = new Entity(Tower, vec3.new(0, 0, -2), vec3.new(0, 90, 0), 1);
-    mSceneManager.load(new Scene([eTower], mLight, mCamera));
-
-    var code = 0;
-
-    document.onkeydown = (e) => {
-        if (e.keyCode == 87) {
-            code = 87;
-        } else if (e.keyCode == 83) {
-            code = 83;
-        } else if (e.keyCode == 68) {
-            code = 68;
-        } else if (e.keyCode == 65) {
-            code = 65;
-        } else if (e.keyCode == 81) {
-            code = 81;
-        } else if (e.keyCode == 81) {
-            code = 81;
-        } else if (e.keyCode == 69) {
-            code = 69;
-        } else if (e.keyCode == 39) {
-            code = 39;
-        } else if (e.keyCode == 37) {
-            code = 37;
-        }
+        var mv = new ModelViewer('gl');
+        console.log(mv);
+        mv.init(model + '.obj', texture + '.png');
     }
-    document.onkeyup = () => {
-        code = 0;
-    }
+}
 
-    mDisplayManager.updateDisplay(() => {
-        mCamera.move(code);
-        mDisplayManager.resize();
-        mSceneManager.render();
-    })
+})
 
-
-}, (err)=>{console.log(err)})
