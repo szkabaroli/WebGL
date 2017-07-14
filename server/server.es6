@@ -3,8 +3,8 @@ import path from 'path';
 const app = express();
 
 const models = [
-    {name:'hello', img:'fbx.jpg', link:'/view.html?model=test&texture=grid'},
-    {name:'hello', img:'fbx.jpg', link:'/view.html?model=cube&texture=col'}
+    {name:'Dragon', img:'dragon.png', link:'/view.html?model=dragon&texture=col&name=Dragon'},
+    {name:'Bunny', img:'bunny.png', link:'/view.html?model=cube&texture=col&name=Bunny'}
 ]
 
 app.use(express.static(path.join(__dirname, '../', 'static')));

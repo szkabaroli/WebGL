@@ -17396,11 +17396,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
         } else if (pageName.indexOf('view') !== -1) {
             var model = window.location.href.split('?')[1].split('&')[0].split('=')[1];
             var texture = window.location.href.split('?')[1].split('&')[1].split('=')[1];
-            console.log(model);
-            console.log(texture);
-
+            var name = window.location.href.split('?')[1].split('&')[2].split('=')[1];
+            console.log(name);
             var mv = new _modelViewer2.default('gl');
-            console.log(mv);
+            (0, _jquery2.default)('#modelName').html(name);
             mv.init(model + '.obj', texture + '.png');
         }
     }
