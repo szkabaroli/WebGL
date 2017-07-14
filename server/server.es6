@@ -4,7 +4,7 @@ const app = express();
 
 const models = [
     {name:'Dragon', img:'dragon.png', link:'/view.html?model=dragon&texture=col&name=Dragon'},
-    {name:'Bunny', img:'bunny.png', link:'/view.html?model=cube&texture=col&name=Bunny'}
+    {name:'Bunny', img:'bunny.png', link:'/view.html?model=bunny&texture=col&name=Bunny'}
 ]
 
 app.use(express.static(path.join(__dirname, '../', 'static')));
